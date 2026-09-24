@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="480" viewBox="0 0 1440 480">
+  <title>Home and Living — Homepage Footer</title>
+  <desc>Separate footer placed below the newsletter. Temporary publication name.</desc>
+  <rect width="1440" height="480" fill="#EEEBE2"/>
+  <path d="M80 1H1360" stroke="#D6D1C5"/>
+  <g fill="#292B25">
+    <text x="80" y="100" font-family="Cormorant Garamond, Georgia, serif" font-size="46">home &amp; living</text>
+    <g font-family="DM Sans, Arial, sans-serif" font-size="15" fill="#56594F">
+      <text x="80" y="141">Thoughtful ideas. Beautiful rooms.</text>
+      <text x="80" y="167">A home that feels like you.</text>
+      <text x="80" y="209">Inspiration, practical advice, and considered</text>
+      <text x="80" y="235">finds for making everyday living better.</text>
+      <text x="80" y="289" fill="#46513E">PINTEREST  ↗       INSTAGRAM  ↗</text>
+    </g>
+    <g font-family="DM Sans, Arial, sans-serif">
+      <g font-size="12" letter-spacing="1.6" fill="#46513E">
+        <text x="544" y="83">EXPLORE</text>
+        <text x="832" y="83">BY ROOM</text>
+        <text x="1092" y="83">ABOUT US</text>
+      </g>
+      <g font-size="15">
+        <text x="544" y="125">Interior Design</text>
+        <text x="544" y="160">Home Organization</text>
+        <text x="544" y="195">Shopping Finds</text>
+        <text x="544" y="230">Best Products</text>
+        <text x="544" y="265">Buying Guides</text>
+        <text x="544" y="300">Shop the Look</text>
+        <text x="832" y="125">Bedroom</text>
+        <text x="832" y="160">Living Room</text>
+        <text x="832" y="195">Kitchen</text>
+        <text x="832" y="230">Bathroom</text>
+        <text x="1092" y="125">Our Story</text>
+        <text x="1092" y="160">Contact</text>
+        <text x="1092" y="195">Editorial Policy</text>
+        <text x="1092" y="230">Affiliate Disclosure</text>
+      </g>
+    </g>
+  </g>
+  <path d="M80 345H1360" stroke="#CDC8BB"/>
+  <g font-family="DM Sans, Arial, sans-serif" font-size="13" fill="#56594F">
+    <text x="80" y="384">Some shopping links are affiliate links. We may earn a commission if you buy through them.</text>
+    <text x="80" y="438">© 2026 Home &amp; Living. All rights reserved.</text>
+    <text x="1103" y="438">Privacy Policy</text>
+    <text x="1255" y="438">Terms of Use</text>
+  </g>
+</svg>
