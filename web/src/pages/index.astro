@@ -1,0 +1,146 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import { getArticles, getSettings, href } from '../lib/content';
+const settings = await getSettings();
+const all = await getArticles();
+const featured =
+  all.find((a) => a.slug === settings.featuredArticle) ||
+  all.find((a) => a.slug === 'modern-luxury-bedroom-ideas') ||
+  all[0];
+const ideas = all
+  .filter((a) => a.kind === 'inspiration')
+  .sort(
+    (a, b) =>
+      Number((settings.latestArticles as string[]).includes(b.slug)) -
+      Number((settings.latestArticles as string[]).includes(a.slug)),
+  );
+const shop = all.filter((a) => a.kind === 'finds');
+const looks = all.filter((a) => a.kind === 'look');
+const rooms = ['Bedroom', 'Living Room', 'Kitchen', 'Bathroom'];
+---
+
+<Base>
+  <div class="wrap">
+    {featured ? (
+      <section class="hero">
+        <a class="hero-image" href={href(featured)}>
+          <img
+            src={featured.image}
+            alt={featured.alt}
+            width="1000"
+            height="760"
+            fetchpriority="high"
+          />
+        </a>
+        <div class="hero-copy">
+          <p class="eyebrow">THE ART OF FEELING AT HOME</p>
+          <h1>
+            <a href={href(featured)}>{featured.title}</a>
+          </h1>
+          <p>{featured.excerpt}</p>
+          <a class="text-link" href={href(featured)}>
+            Read the story →
+          </a>
+        </div>
+      </section>
+    ) : (
+      <section class="page-intro">
+        <h1>Make yourself at home.</h1>
+        <p>Our first stories are on their way.</p>
+      </section>
+    )}
+    <Section title="Latest Ideas" articles={ideas.slice(0, 6)} columns={3} />
+    <section class="section">
+      <div class="section-heading">
+        <h2>Find ideas for your room</h2>
+        <a class="text-link" href="/rooms/">
+          All rooms ↗
+        </a>
+      </div>
+      <div class="grid cols-2 rooms-grid">
+        {rooms.map((room) => {
+          const a = all.find((a) => a.room === room.toLowerCase());
+          return (
+            <a href={'/rooms/' + room.toLowerCase().replaceAll(' ', '-') + '/'}>
+              {a && (
+                <img
+                  src={a.image}
+                  alt={room + ' interior'}
+                  width="650"
+                  height="400"
+                  loading="lazy"
+                />
+              )}
+              <div>
+                <h3>{room}</h3>
+                <span>Explore room ↗</span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+    <Section
+      title="Interior Design Inspiration"
+      articles={ideas.slice(6, 9)}
+      columns={3}
+      link="/interior-design/"
+    />
+  </div>
+  <div class="band">
+    <div class="wrap">
+      <Section
+        title="Make your home work better"
+        articles={ideas
+          .filter((a) => /small|storage|feng/i.test(a.title))
+          .slice(0, 3)}
+        columns={3}
+        link="/organization/"
+      />
+    </div>
+  </div>
+  <div class="wrap">
+    <Section
+      title="Shopping Finds"
+      articles={shop.slice(0, 4)}
+      link="/shopping/"
+    />
+    {looks[0] && (
+      <section class="split-feature">
+        <img
+          src={looks[0].image}
+          alt={looks[0].alt}
+          loading="lazy"
+          width="850"
+          height="650"
+        />
+        <div>
+          <p class="eyebrow">SHOP THE LOOK</p>
+          <h2>
+            A little inspiration.
+            <br />A room of your own.
+          </h2>
+          <p>
+            Discover the shapes, textures, and considered details that bring a
+            beautiful room together.
+          </p>
+          <a class="button" href={href(looks[0])}>
+            Explore this look ↗
+          </a>
+        </div>
+      </section>
+    )}
+    <Section
+      title="Considered picks for your home"
+      articles={all.filter((a) => a.kind === 'best').slice(0, 3)}
+      columns={3}
+    />
+    <Section
+      title="Before you bring it home"
+      articles={all.filter((a) => a.kind === 'guide').slice(0, 3)}
+      columns={3}
+    />
+    <Section title="More to inspire you" articles={ideas.slice(10, 14)} />
+  </div>
+</Base>

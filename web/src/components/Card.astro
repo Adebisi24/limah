@@ -1,0 +1,16 @@
+---
+import { href } from '../lib/content';
+const { article: a, compact = false } = Astro.props;
+---
+
+<article class:list={['card', { compact }]}>
+  <a href={href(a)} class="card-image">
+    <img src={a.image} alt={a.alt} loading="lazy" width="600" height="450" />
+  </a>
+  <div class="card-copy">
+    <p class="eyebrow">{a.category}</p>
+    <h3>
+      <a href={href(a)}>{a.title}</a>
+    </h3>
+  </div>
+</article>

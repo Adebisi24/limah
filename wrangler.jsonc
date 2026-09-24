@@ -1,0 +1,5 @@
+{
+  "name": "nest-nabber",
+  "compatibility_date": "2026-09-24",
+  "assets": { "directory": "./web/dist", "not_found_handling": "404-page" },
+}

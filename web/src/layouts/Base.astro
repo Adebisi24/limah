@@ -1,0 +1,198 @@
+---
+import '../styles/global.css';
+import { getSettings } from '../lib/content';
+const settings = await getSettings();
+const {
+  title = 'Ideas for a home that feels like you',
+  description = settings.description,
+  image,
+  noindex = false,
+} = Astro.props;
+const canonical = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).href
+  : undefined;
+const demo = import.meta.env.CONTENT_MODE !== 'sanity';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | {settings.brandName}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#faf8f3" />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    {image && (
+      <meta
+        property="og:image"
+        content={Astro.site ? new URL(image, Astro.site).href : image}
+      />
+    )}
+    <meta
+      name="robots"
+      content={demo || noindex ? 'noindex,nofollow' : 'index,follow'}
+    />
+    <link rel="icon" href="/favicon.svg" />
+  </head>
+  <body>
+    <a class="skip" href="#main">
+      Skip to content
+    </a>
+    <header class="masthead">
+      <div class="masthead-top wrap">
+        <p class="tagline">
+          IDEAS FOR A HOME
+          <br />
+          THAT FEELS LIKE YOU
+        </p>
+        <a class="wordmark" href="/" aria-label="Nest Nabber home">
+          {settings.brandName.toLowerCase()}
+        </a>
+        <a class="weekly" href="#newsletter">
+          THE WEEKLY EDIT ↗
+        </a>
+      </div>
+      <nav class="nav wrap" aria-label="Main navigation">
+        <div class="nav-links">
+          <a href="/interior-design/">Interior Design</a>
+          <a href="/rooms/">Rooms</a>
+          <a href="/organization/">Home Organization</a>
+          <a href="/shopping/">Shopping</a>
+        </div>
+        <div class="nav-tools">
+          <a href="/saved/">
+            Saved <span aria-hidden="true">♡</span>
+          </a>
+          <a href="/search/">
+            Search <span aria-hidden="true">⌕</span>
+          </a>
+        </div>
+      </nav>
+    </header>
+    {demo && (
+      <div class="demo-notice">Design preview · Sample editorial content</div>
+    )}
+    <main id="main">
+      <slot />
+    </main>
+    <section class="newsletter" id="newsletter">
+      <div>
+        <span class="eyebrow">A LITTLE INSPIRATION, EVERY WEEK</span>
+        <h2>
+          A home you love.
+          <br />
+          An inbox you look forward to.
+        </h2>
+        <p>
+          Fresh ideas, thoughtful finds, and small ways to make your space your
+          own.
+        </p>
+      </div>
+      <div class="newsletter-action">
+        <span class="eyebrow">THE NEST NABBER EDIT</span>
+        <p>Our newsletter is coming soon.</p>
+        <button class="button" disabled>
+          Subscriptions opening soon
+        </button>
+      </div>
+    </section>
+    <footer>
+      <div class="footer-grid wrap">
+        <div>
+          <a class="wordmark" href="/">
+            {settings.brandName.toLowerCase()}
+          </a>
+          <p>Ideas for a home that feels like you.</p>
+        </div>
+        <div>
+          <h3>Explore</h3>
+          <a href="/interior-design/">Interior Design</a>
+          <a href="/rooms/">Rooms</a>
+          <a href="/organization/">Home Organization</a>
+          <a href="/shopping/">Shopping</a>
+        </div>
+        <div>
+          <h3>Make yourself at home</h3>
+          <a href="/about/">About Nest Nabber</a>
+          <a href="/saved/">Your saved articles</a>
+          <a href="/contact/">Contact</a>
+        </div>
+        <div>
+          <h3>The details</h3>
+          <a href="/privacy/">Privacy</a>
+          <a href="/affiliate-disclosure/">Affiliate disclosure</a>
+          <a href="/editorial-policy/">Editorial policy</a>
+        </div>
+      </div>
+      <div class="footer-bottom wrap">
+        <span>© {new Date().getFullYear()} Nest Nabber</span>
+        <span>Thoughtfully collected. Beautifully lived in.</span>
+      </div>
+    </footer>
+    <script>
+      import { readList, toggleItem } from '../lib/reading-list.mjs';
+      const render = () => {
+        document
+          .querySelectorAll<HTMLButtonElement>('[data-action]')
+          .forEach((button) => {
+            try {
+              const active = readList(
+                localStorage,
+                'nest-' + button.dataset.action,
+              ).includes(button.dataset.id || '');
+              button.setAttribute('aria-pressed', String(active));
+              button.textContent =
+                button.dataset.action === 'saved'
+                  ? active
+                    ? '✓ Saved'
+                    : '♡ Save article'
+                  : active
+                    ? '♥ Liked'
+                    : '♡ Like article';
+            } catch {}
+          });
+        document
+          .querySelectorAll<HTMLElement>('[data-saved-card]')
+          .forEach((card) => {
+            try {
+              card.hidden = !readList(localStorage, 'nest-saved').includes(
+                card.dataset.savedCard || '',
+              );
+            } catch {
+              card.hidden = true;
+            }
+          });
+        const empty = document.querySelector<HTMLElement>('[data-saved-empty]');
+        if (empty)
+          empty.hidden = !!document.querySelector(
+            '[data-saved-card]:not([hidden])',
+          );
+      };
+      document
+        .querySelectorAll<HTMLButtonElement>('[data-action]')
+        .forEach((button) =>
+          button.addEventListener('click', () => {
+            try {
+              toggleItem(
+                localStorage,
+                'nest-' + button.dataset.action,
+                button.dataset.id,
+              );
+              render();
+            } catch {
+              const status = document.querySelector('[data-reading-status]');
+              if (status)
+                status.textContent =
+                  'Your browser could not save this preference. Please allow local storage and try again.';
+            }
+          }),
+        );
+      window.addEventListener('storage', render);
+      render();
+    </script>
+  </body>
+</html>

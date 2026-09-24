@@ -1,0 +1,372 @@
+---
+import Base from '../../layouts/Base.astro';
+import Section from '../../components/Section.astro';
+import Products from '../../components/Products.astro';
+import Retailers from '../../components/Retailers.astro';
+import { PortableText } from 'astro-portabletext';
+import { getArticles, related, href, type Article } from '../../lib/content';
+import { demoProducts } from '../../lib/demo-products';
+export async function getStaticPaths() {
+  return (await getArticles()).map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+const a = Astro.props.article as Article;
+const all = await getArticles();
+const kind = a.kind;
+const products = a.products || (a.demo ? demoProducts(kind, a.title) : []);
+const ideas =
+  a.ideas ||
+  (a.demo
+    ? (a.images || []).map((image, i) => ({
+        image,
+        title: [
+          'Start with a thoughtful palette',
+          'Let natural texture lead',
+          'Make room for soft light',
+          'Give your bed a beautiful backdrop',
+          'Layer with intention',
+          'Choose pieces with purpose',
+          'Create a quiet corner',
+          'Add warmth underfoot',
+          'Bring a little nature indoors',
+          'Balance open and closed storage',
+          'Play with proportion',
+          'Keep everyday comforts close',
+          'Give the walls character',
+          'Leave a little breathing room',
+          'Make the finishing touches personal',
+        ][i % 15],
+        text: 'Use this image as a starting point for your room. Notice the balance of color, texture, and space, then choose the details that work for the way you live. This sample text will be replaced with your full article.',
+      }))
+    : []);
+const roomTitle = a.room.replace(/\b\w/g, (s) => s.toUpperCase());
+const shopping = related(
+  all,
+  a,
+  kind === 'finds' ? 'finds' : 'shopping',
+  kind === 'inspiration' ? 8 : 12,
+);
+const inspiration = related(
+  all,
+  a,
+  'inspiration',
+  kind === 'inspiration' ? 12 : 8,
+);
+const looks = related(all, a, 'look', 8);
+const plans = a.planLinks?.length
+  ? a.planLinks
+  : all
+      .filter(
+        (x) =>
+          x.id !== a.id &&
+          ['guide', 'inspiration'].includes(x.kind) &&
+          x.room === a.room,
+      )
+      .slice(0, 8);
+---
+
+<Base
+  title={a.seoTitle || a.title}
+  description={a.seoDescription || a.excerpt}
+  image={a.image}
+>
+  <article class="wrap article">
+    <header class="article-heading">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <a href={kind === 'inspiration' ? '/interior-design/' : '/shopping/'}>
+          {a.category}
+        </a>
+      </nav>
+      <p class="eyebrow">
+        {a.category} · {a.room}
+      </p>
+      <h1>{a.title}</h1>
+      <p class="dek">{a.excerpt}</p>
+      <div class="byline">
+        {a.demo
+          ? 'Sample article'
+          : a.author
+            ? 'By ' + a.author
+            : 'Nest Nabber'}
+        {a.publishedAt && (
+          <span>
+            {' '}
+            ·{' '}
+            {new Date(a.publishedAt).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </span>
+        )}
+      </div>
+      <div class="reading-actions">
+        <button data-action="liked" data-id={a.id} aria-pressed="false">
+          ♡ Like article
+        </button>
+        <button data-action="saved" data-id={a.id} aria-pressed="false">
+          ♡ Save article
+        </button>
+      </div>
+      <p class="small muted">Likes and saves stay in this browser.</p>
+      <p data-reading-status role="status" class="small"></p>
+    </header>
+    <figure class="article-hero">
+      <img
+        src={a.image}
+        alt={a.alt}
+        width="1400"
+        height="850"
+        fetchpriority="high"
+      />
+      {(a.credit || a.caption) && (
+        <figcaption>
+          {a.caption}
+          {a.credit && ' � ' + a.credit}
+        </figcaption>
+      )}
+    </figure>
+    {kind !== 'inspiration' && (
+      <p class="disclosure">
+        We may earn a commission from qualifying purchases through retailer
+        links.{' '}
+        <a href="/affiliate-disclosure/">How we choose and share products</a>.
+      </p>
+    )}
+    <div class="prose intro">
+      {a.body?.length ? (
+        <PortableText value={a.body} />
+      ) : (
+        <p>
+          A beautiful room starts with how you want to feel in it. Let these
+          ideas guide the colors, textures, and practical details you bring into
+          your own space.
+          {a.demo && ' This is sample editorial copy for your preview.'}
+        </p>
+      )}
+    </div>
+    {kind === 'inspiration' && (
+      <div class="ideas">
+        {ideas.map((idea: any, i: number) => (
+          <>
+            <section class="idea">
+              <div class="prose">
+                <p class="eyebrow">
+                  {String(i + 1).padStart(2, '0')} /{' '}
+                  {String(ideas.length).padStart(2, '0')}
+                </p>
+                <h2>{idea.title}</h2>
+              </div>
+              <img
+                src={idea.image}
+                alt={idea.alt || idea.title}
+                width="840"
+                height="700"
+                loading="lazy"
+              />
+              {idea.credit && <p class="prose small muted">{idea.credit}</p>}
+              <p class="prose">{idea.text}</p>
+            </section>
+            {i === 4 && all.find((x) => x.kind === 'look') && (
+              <aside class="inline-callout">
+                <p class="eyebrow">BRING THE IDEA HOME</p>
+                <h3>Love this feeling? Explore a complete look.</h3>
+                <a
+                  class="text-link"
+                  href={href(all.find((x) => x.kind === 'look')!)}
+                >
+                  Shop the Look →
+                </a>
+              </aside>
+            )}
+            {i === 9 && all.find((x) => x.kind === 'guide') && (
+              <p class="prose contextual">
+                Planning the lighting?{' '}
+                <a href={href(all.find((x) => x.kind === 'guide')!)}>
+                  Read our bedroom lighting guide →
+                </a>
+              </p>
+            )}
+          </>
+        ))}
+      </div>
+    )}
+    {['best', 'look'].includes(kind) && products.length > 0 && (
+      <section class="quick-picks">
+        <h2>{kind === 'look' ? 'Quick Shop' : 'Our Quick Picks'}</h2>
+        {products
+          .slice(0, kind === 'best' ? 4 : products.length)
+          .map((p: any, i: number) => (
+            <div class="quick-row">
+              <img
+                src={p.image || '/product.svg'}
+                alt={p.title}
+                width="110"
+                height="110"
+                loading="lazy"
+              />
+              <div>
+                <p class="eyebrow">
+                  {kind === 'best'
+                    ? p.label
+                    : p.matchType === 'exact'
+                      ? 'EXACT PRODUCT'
+                      : 'SIMILAR LOOK'}
+                </p>
+                <h3>
+                  <a href={'#product-' + (i + 1)}>{p.title} ↓</a>
+                </h3>
+              </div>
+              <Retailers retailers={p.retailers} single demo={a.demo} />
+            </div>
+          ))}
+      </section>
+    )}
+    {kind === 'guide' && a.demo && (
+      <div class="guide prose">
+        <h2>Start with the way you use your room</h2>
+        <p>
+          Consider reading, getting ready, resting, and moving around. Plan
+          around those everyday activities before choosing individual pieces.
+        </p>
+        <h2>Measure before you choose</h2>
+        <figure class="sizing-diagram">
+          <div class="lamp-shape">↕</div>
+          <div class="bed-shape">Your bed</div>
+          <div class="table-shape">
+            Bedside
+            <br />
+            surface
+          </div>
+          <figcaption>
+            Check the surface height, reach from the bed, and space for everyday
+            essentials.
+          </figcaption>
+        </figure>
+        <h2>Your buying checklist</h2>
+        <ul class="checklist">
+          <li>Measure the space and access routes.</li>
+          <li>Check materials, care instructions, and dimensions.</li>
+          <li>Compare the product with the rest of your room.</li>
+          <li>Read the retailer's returns and delivery terms.</li>
+        </ul>
+        <h2>Common mistakes to avoid</h2>
+        <p>
+          Choosing on appearance alone, overlooking dimensions, and buying every
+          piece at once can make a room harder to live in. Start with the
+          essentials and build around them.
+        </p>
+        <h2>Three ideas to consider</h2>
+      </div>
+    )}
+    {kind === 'guide' && !a.demo && (
+      <div class="guide prose">
+        {(a.guideSections || []).map((section: any) => (
+          <section>
+            <h2>{section.title}</h2>
+            <p>{section.text}</p>
+            {section.image && (
+              <img src={section.image} alt={section.title} loading="lazy" />
+            )}
+            {section.checklist?.length > 0 && (
+              <ul>
+                {section.checklist.map((item: string) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
+      </div>
+    )}
+    {kind !== 'inspiration' && (
+      <Products products={products} kind={kind} demo={a.demo} />
+    )}
+    {kind === 'best' && (
+      <>
+        <section class="comparison">
+          <h2>Compare the picks</h2>
+          <div class="table-scroll">
+            <table>
+              <caption>At a glance</caption>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Selection</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p: any, i: number) => (
+                  <tr>
+                    <th scope="row">
+                      <a href={'#product-' + (i + 1)}>{p.title}</a>
+                    </th>
+                    <td>{p.label}</td>
+                    <td>{p.details}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="prose methodology">
+          <h2>How these products are selected</h2>
+          <p>
+            {a.methodology ||
+              'This preview illustrates where the selection methodology belongs. No hands-on testing or verified product recommendations are claimed. The editor must supply the research criteria and evidence before publication.'}
+          </p>
+          <h2>What to consider before buying</h2>
+          <p>
+            Compare the dimensions, intended use, materials, retailer
+            information, and your budget. Recheck price and availability with
+            the retailer.
+          </p>
+        </section>
+      </>
+    )}
+    {kind === 'look' ? (
+      <>
+        <Section title="More Looks to Shop" articles={looks} related />
+        <section class="section plan-room">
+          <h2>Plan Your Room</h2>
+          <div class="link-list">
+            {plans.map((p) => (
+              <a href={'/articles/' + p.slug + '/'}>
+                {p.title}
+                <span>→</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      </>
+    ) : (
+      <>
+        <Section
+          title={
+            kind === 'inspiration'
+              ? 'More ' + roomTitle + ' Ideas'
+              : kind === 'finds'
+                ? 'More ' + roomTitle + ' Finds'
+                : 'More ' + roomTitle + ' Shopping'
+          }
+          articles={kind === 'inspiration' ? inspiration : shopping}
+          related
+        />
+        <Section
+          title={
+            kind === 'inspiration'
+              ? 'Shop for Your ' + roomTitle
+              : roomTitle + ' Inspiration'
+          }
+          articles={kind === 'inspiration' ? shopping : inspiration}
+          related
+        />
+      </>
+    )}
+  </article>
+</Base>

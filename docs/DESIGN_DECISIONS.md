@@ -1,6 +1,6 @@
 # Latest design decisions
 
-Warm editorial palette, serif headings, offwhite backgrounds. Use the chosen `home & living` masthead and full footer across templates. Desktop 1440px, mobile 390px. Brand name remains provisional.
+Warm editorial palette, serif headings, offwhite backgrounds. Use the chosen masthead layout with `nest nabber` branding and full footer across templates. Desktop 1440px, mobile 390px. Brand name is Nest Nabber.
 
 1. Homepage: complete editorial homepage, rooms, organization, shopping, newsletter and footer.
 2. Inspiration: 15 ideas; desktop idea images centered at 840px. Related bedroom ideas: 12; related shopping: 8. Four columns on desktop, image/title side-by-side on mobile. No table of contents.
@@ -14,3 +14,5 @@ Warm editorial palette, serif headings, offwhite backgrounds. Use the chosen `ho
 General product order unless overridden above: product name, image, price/retailer button, pros/cons, explanation, best for/details. If no verified price, use Check Price at Retailer. Exact and similar products must be distinguished. No fabricated testing claims. No hotspots for V1.
 
 Articles are reused through room/style relationships rather than duplicated by hubs. Style landing pages require sufficient content before becoming public SEO destinations.
+
+Launch decisions: no reader accounts; personal likes and saves stored in the browser. Newsletter service integration is pending. Cloudflare static deployment is the target, with Sanity editorial content and a free-plan-first budget.

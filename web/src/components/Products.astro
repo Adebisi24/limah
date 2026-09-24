@@ -1,0 +1,75 @@
+---
+import Retailers from './Retailers.astro';
+const { products = [], kind, demo = false } = Astro.props;
+---
+
+<div class="products">
+  {products.map((p: any, i: number) => (
+    <section class="product" id={'product-' + (i + 1)}>
+      <p class="eyebrow">
+        {kind === 'best'
+          ? p.label || 'OUR PICK'
+          : kind === 'look'
+            ? p.matchType === 'exact'
+              ? 'EXACT PRODUCT'
+              : 'SIMILAR LOOK'
+            : 'THE BEDROOM EDIT'}
+      </p>
+      <h2>
+        {i + 1}. {p.title}
+      </h2>
+      <figure class="product-image">
+        <img
+          src={p.image || '/product.svg'}
+          alt={p.title}
+          width="700"
+          height="580"
+          loading="lazy"
+        />
+        {demo && <figcaption>Illustrative product concept</figcaption>}
+      </figure>
+      <Retailers retailers={p.retailers} single={kind !== 'best'} demo={demo} />
+      {kind === 'best' && (
+        <div class="pros-cons">
+          <div>
+            <h3>What we like</h3>
+            <ul>
+              {(p.pros || []).map((x: string) => (
+                <li>{x}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3>What to consider</h3>
+            <ul>
+              {(p.cons || []).map((x: string) => (
+                <li>{x}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+      <div class="product-copy">
+        <h3>
+          {kind === 'finds'
+            ? 'Why we like it'
+            : kind === 'look'
+              ? 'Why it works'
+              : 'A closer look'}
+        </h3>
+        <p>{p.explanation || p.whyItWorks}</p>
+        {kind === 'look' && p.lookFor && (
+          <>
+            <h3>Look for</h3>
+            <p>{p.lookFor}</p>
+          </>
+        )}
+        {kind !== 'finds' && p.details && (
+          <p class="detail">
+            <strong>Details</strong> · {p.details}
+          </p>
+        )}
+      </div>
+    </section>
+  ))}
+</div>

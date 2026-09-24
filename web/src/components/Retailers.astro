@@ -1,0 +1,25 @@
+---
+import { safeRetailerUrl } from '../lib/reading-list.mjs';
+const { retailers = [], single = false, demo = false } = Astro.props;
+const links = retailers
+  .filter((r: any) => safeRetailerUrl(r.url))
+  .slice(0, single ? 1 : 3);
+---
+
+<div class="retailers">
+  {links.map((r: any) => (
+    <a
+      class="button"
+      href={safeRetailerUrl(r.url)!}
+      target="_blank"
+      rel="sponsored noopener noreferrer"
+    >
+      {r.verifiedPrice || 'Check price at ' + r.name} ↗
+    </a>
+  ))}
+  {!links.length && (
+    <button class="button" disabled>
+      {demo ? 'Retailer link coming soon' : 'Currently unavailable'}
+    </button>
+  )}
+</div>

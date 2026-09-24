@@ -1,0 +1,28 @@
+---
+import Card from './Card.astro';
+const {
+  title,
+  articles = [],
+  link,
+  columns = 4,
+  related = false,
+} = Astro.props;
+---
+
+{articles.length > 0 && (
+  <section class:list={['section', { related }]}>
+    <div class="section-heading">
+      <h2>{title}</h2>
+      {link && (
+        <a class="text-link" href={link}>
+          Explore more ↗
+        </a>
+      )}
+    </div>
+    <div class:list={['grid', `cols-${columns}`]}>
+      {articles.map((a: any) => (
+        <Card article={a} />
+      ))}
+    </div>
+  </section>
+)}

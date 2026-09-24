@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import Card from '../components/Card.astro';
+import { getArticles } from '../lib/content';
+const all = await getArticles();
+---
+
+<Base title="Your saved articles" noindex>
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="eyebrow">YOUR OWN LITTLE COLLECTION</p>
+      <h1>Keep the ideas you love.</h1>
+      <p>Saved in this browser, ready when you need a little inspiration.</p>
+    </header>
+    <p data-reading-status role="status"></p>
+    <p data-saved-empty class="empty">
+      Your collection is waiting. Tap “Save article” on a story to keep it here.{' '}
+      <a href="/">Explore the latest ideas →</a>
+    </p>
+    <div class="grid cols-4 saved-grid">
+      {all.map((a) => (
+        <div data-saved-card={a.id} hidden>
+          <Card article={a} />
+          <button
+            class="save-remove"
+            data-action="saved"
+            data-id={a.id}
+            aria-pressed="true"
+          >
+            ✓ Saved
+          </button>
+        </div>
+      ))}
+    </div>
+    <noscript>
+      Enable JavaScript to view articles saved in this browser.
+    </noscript>
+  </div>
+</Base>

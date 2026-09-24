@@ -1,0 +1,79 @@
+---
+import Base from '../layouts/Base.astro';
+import Card from '../components/Card.astro';
+import { getArticles } from '../lib/content';
+const all = await getArticles();
+---
+
+<Base title="Search" noindex>
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="eyebrow">FIND YOUR NEXT IDEA</p>
+      <h1>A little inspiration awaits.</h1>
+      <form class="search-form" action="/search/" role="search">
+        <label for="query">Search articles, rooms, and shopping guides</label>
+        <div>
+          <input
+            type="search"
+            name="q"
+            id="query"
+            placeholder="Try bedroom, lighting, or small spaces"
+          />
+          <button class="button" type="submit">
+            Search
+          </button>
+        </div>
+      </form>
+    </header>
+    <p id="result-count" role="status"></p>
+    <div class="grid cols-4 search-results">
+      {all.map((a) => (
+        <div
+          data-search={(
+            a.title +
+            ' ' +
+            a.room +
+            ' ' +
+            a.category
+          ).toLowerCase()}
+        >
+          <Card article={a} />
+        </div>
+      ))}
+    </div>
+    <p id="no-results" class="empty" hidden>
+      No articles match that search. Try a room name or a broader phrase.
+    </p>
+  </div>
+  <script>
+    const input = document.querySelector<HTMLInputElement>('#query')!;
+    const form = document.querySelector<HTMLFormElement>('.search-form')!;
+    const filter = () => {
+      const words = input.value
+        .toLowerCase()
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+      let count = 0;
+      document.querySelectorAll<HTMLElement>('[data-search]').forEach((el) => {
+        el.hidden = !words.every((w) => el.dataset.search!.includes(w));
+        if (!el.hidden) count++;
+      });
+      document.querySelector('#result-count')!.textContent =
+        `${count} ${count === 1 ? 'article' : 'articles'}`;
+      document.querySelector<HTMLElement>('#no-results')!.hidden = count > 0;
+    };
+    input.value = new URLSearchParams(location.search).get('q') || '';
+    input.addEventListener('input', filter);
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      history.replaceState(
+        null,
+        '',
+        '/search/?q=' + encodeURIComponent(input.value),
+      );
+      filter();
+    });
+    filter();
+  </script>
+</Base>

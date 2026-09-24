@@ -1,0 +1,80 @@
+---
+import Base from '../../layouts/Base.astro';
+import Section from '../../components/Section.astro';
+import { getArticles } from '../../lib/content';
+export function getStaticPaths() {
+  return ['bedroom', 'living-room', 'kitchen', 'bathroom'].map((room) => ({
+    params: { room },
+  }));
+}
+const name = Astro.params.room!.replaceAll('-', ' ');
+const title = name.replace(/\b\w/g, (s) => s.toUpperCase());
+const all = (await getArticles()).filter((a) => a.room === name);
+const hero = all[0];
+---
+
+<Base title={title + ' ideas and inspiration'}>
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="eyebrow">MAKE YOURSELF AT HOME</p>
+      <h1>{title}</h1>
+      <p>
+        Fresh inspiration, practical advice, and thoughtful finds for your{' '}
+        {name}.
+      </p>
+    </header>
+    {hero && (
+      <img
+        class="hub-hero"
+        src={hero.image}
+        alt={hero.alt}
+        width="1400"
+        height="650"
+      />
+    )}
+    <Section
+      title={title + ' ideas'}
+      articles={all.filter((a) => a.kind === 'inspiration').slice(0, 8)}
+    />
+    <section class="section">
+      <h2>Find your style</h2>
+      <div class="style-links">
+        {[
+          'Warm & neutral',
+          'Modern',
+          'Small spaces',
+          'Natural textures',
+          'Classic',
+          'Colorful',
+        ].map((s) => (
+          <a href={'/search/?q=' + encodeURIComponent(s.split(' ')[0])}>
+            {s} ↗
+          </a>
+        ))}
+      </div>
+    </section>
+    <Section
+      title="Make room for everyday living"
+      articles={all
+        .filter((a) => /small|storage|space/i.test(a.title))
+        .slice(0, 4)}
+    />
+    <Section
+      title="Ideas and advice"
+      articles={all.filter((a) => a.kind === 'inspiration').slice(4, 8)}
+    />
+    {[
+      ['look', 'Shop the Look'],
+      ['finds', 'Shopping Finds'],
+      ['best', 'Best Products'],
+      ['guide', 'Buying Guides'],
+    ].map(([kind, label]) => (
+      <Section
+        title={label}
+        articles={all.filter((a) => a.kind === kind).slice(0, 4)}
+      />
+    ))}
+    <Section title={'Latest in ' + title} articles={all.slice(-8)} />
+    {all.length === 0 && <p class="empty">Our {name} edit is coming soon.</p>}
+  </div>
+</Base>

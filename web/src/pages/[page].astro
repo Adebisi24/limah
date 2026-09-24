@@ -1,0 +1,151 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import { getArticles, getSettings } from '../lib/content';
+export function getStaticPaths() {
+  return [
+    'rooms',
+    'interior-design',
+    'organization',
+    'about',
+    'contact',
+    'privacy',
+    'affiliate-disclosure',
+    'editorial-policy',
+  ].map((page) => ({ params: { page } }));
+}
+const settings = await getSettings();
+const page = Astro.params.page!;
+const titles: Record<string, string> = {
+  rooms: 'Every room, a little more you.',
+  'interior-design': 'Ideas to make your own.',
+  organization: 'A little order. A lot more ease.',
+  about: 'Welcome to Nest Nabber',
+  contact: 'Get in touch',
+  privacy: 'Your privacy',
+  'affiliate-disclosure': 'Our affiliate disclosure',
+  'editorial-policy': 'Our editorial approach',
+};
+const all = await getArticles();
+---
+
+<Base title={titles[page]}>
+  <div class="wrap">
+    <header class="page-intro">
+      <p class="eyebrow">NEST NABBER</p>
+      <h1>{titles[page]}</h1>
+    </header>
+    {page === 'rooms' ? (
+      <div class="link-list room-index">
+        {['Bedroom', 'Living Room', 'Kitchen', 'Bathroom'].map((room) => (
+          <a href={'/rooms/' + room.toLowerCase().replaceAll(' ', '-') + '/'}>
+            {room}
+            <span>→</span>
+          </a>
+        ))}
+      </div>
+    ) : ['interior-design', 'organization'].includes(page) ? (
+      <Section
+        title={
+          page === 'organization'
+            ? 'Make space for everyday living'
+            : 'Explore the latest ideas'
+        }
+        articles={all.filter(
+          (a) =>
+            a.kind === 'inspiration' &&
+            (page !== 'organization' ||
+              /small|storage|feng|space/i.test(a.title)),
+        )}
+      />
+    ) : (
+      <div class="prose info-page">
+        {page === 'about' && (
+          <>
+            <p>
+              Nest Nabber is a place for thoughtful interiors, practical ideas,
+              and considered finds. We believe a home should feel like the
+              people who live in it.
+            </p>
+            <p>
+              Explore room ideas, discover new details, and save the stories
+              that inspire you.
+            </p>
+          </>
+        )}
+        {page === 'contact' && (
+          <p>
+            For editorial enquiries and questions about Nest Nabber, email{' '}
+            <a href={'mailto:' + settings.contactEmail}>
+              {settings.contactEmail}
+            </a>
+            .
+          </p>
+        )}
+        {page === 'privacy' && (
+          <>
+            <p>
+              Likes and saved articles are stored locally in your browser. They
+              are not linked to a reader account or synchronized between
+              devices. Clearing your browser's site data removes these
+              preferences.
+            </p>
+            <p>
+              Newsletter subscriptions are not currently collected. We do not
+              add analytics or advertising trackers to this version. Hosting and
+              external services may process technical request information needed
+              to serve the site.
+            </p>
+            <button class="button" id="clear-preferences">
+              Clear my likes and saves
+            </button>
+            <p id="clear-status" role="status"></p>
+          </>
+        )}
+        {page === 'affiliate-disclosure' && (
+          <>
+            <p>
+              Some shopping articles may contain affiliate links. If you
+              purchase through one of these links, Nest Nabber may earn a
+              commission. Prices and availability can change; always check the
+              retailer before purchasing.
+            </p>
+            <p>
+              Sample products in the design preview are illustrative and do not
+              have active retailer links.
+            </p>
+          </>
+        )}
+        {page === 'editorial-policy' && (
+          <>
+            <p>
+              We aim to distinguish inspiration, editorial research, and
+              hands-on product testing. We do not describe a product as tested
+              unless we have evidence of that testing.
+            </p>
+            <p>
+              Shopping articles identify exact products and similar
+              alternatives. Product claims, specifications, and links should be
+              checked before publication.
+            </p>
+          </>
+        )}
+      </div>
+    )}
+  </div>
+  <script>
+    document
+      .querySelector('#clear-preferences')
+      ?.addEventListener('click', () => {
+        try {
+          localStorage.removeItem('nest-liked');
+          localStorage.removeItem('nest-saved');
+          document.querySelector('#clear-status')!.textContent =
+            'Your likes and saves have been cleared.';
+        } catch {
+          document.querySelector('#clear-status')!.textContent =
+            'Your browser could not clear the preferences.';
+        }
+      });
+  </script>
+</Base>
