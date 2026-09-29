@@ -1,0 +1,180 @@
+import "server-only";
+import { desc, and, eq, inArray, ilike, or, sql, type SQL } from "drizzle-orm";
+import { db } from "@/db";
+import { articles, offers, products } from "@/db/schema";
+import type {
+  Article,
+  ArticleFormat,
+  BodyBlock,
+  Offer,
+  Product,
+} from "./types";
+
+function toArticle(row: typeof articles.$inferSelect): Article {
+  return {
+    slug: row.slug,
+    format: row.format as ArticleFormat,
+    title: row.title,
+    subtitle: row.subtitle,
+    category: row.category,
+    room: row.room as Article["room"],
+    keywords: row.keywords,
+    imageUrl: row.imageUrl,
+    imageAlt: row.imageAlt,
+    description: row.description,
+    author: row.author,
+    publishedAt: row.publishedAt,
+    updatedAt: row.updatedAt,
+    body: row.body as BodyBlock[],
+    tags: row.tags ?? [],
+    popular: row.popular,
+  };
+}
+
+export function productIdsFromBody(body: BodyBlock[]): number[] {
+  const ids = new Set<number>();
+  for (const b of body) {
+    if (b.type === "product") ids.add(b.productId);
+    if (b.type === "quickPicks") b.picks.forEach((p) => ids.add(p.productId));
+    if (b.type === "quickShop") b.items.forEach((i) => ids.add(i.productId));
+    if (b.type === "comparison") b.rows.forEach((r) => ids.add(r.productId));
+  }
+  return [...ids];
+}
+
+export async function getProductsByIds(ids: number[]): Promise<Map<number, Product>> {
+  const map = new Map<number, Product>();
+  if (!ids.length) return map;
+  const prodRows = await db
+    .select()
+    .from(products)
+    .where(inArray(products.id, ids));
+  const offerRows = await db
+    .select()
+    .from(offers)
+    .where(inArray(offers.productId, ids));
+  for (const p of prodRows) {
+    const prodOffers: Offer[] = offerRows
+      .filter((o) => o.productId === p.id)
+      .map((o) => ({
+        retailer: o.retailer,
+        price: o.price,
+        currency: o.currency,
+        affiliateUrl: o.affiliateUrl,
+        availability: (o.availability as Offer["availability"]) ?? "in-stock",
+      }));
+    map.set(p.id, {
+      id: p.id,
+      name: p.name,
+      brand: p.brand,
+      imageUrl: p.imageUrl,
+      imageAlt: p.imageAlt,
+      description: p.description,
+      specs: p.specs,
+      offers: prodOffers,
+    });
+  }
+  return map;
+}
+
+export async function getArticleBySlug(slug: string) {
+  const rows = await db
+    .select()
+    .from(articles)
+    .where(eq(articles.slug, slug))
+    .limit(1);
+  if (!rows.length) return null;
+  const article = toArticle(rows[0]);
+  const productMap = await getProductsByIds(productIdsFromBody(article.body));
+  return { article, productMap };
+}
+
+export interface ArticleFilter {
+  format?: ArticleFormat;
+  formats?: ArticleFormat[];
+  room?: string;
+  tag?: string;
+  excludeSlug?: string;
+  limit?: number;
+}
+
+export async function listArticles(f: ArticleFilter = {}): Promise<Article[]> {
+  const conditions: SQL[] = [];
+  if (f.format) conditions.push(eq(articles.format, f.format));
+  if (f.formats) conditions.push(inArray(articles.format, f.formats));
+  if (f.room) conditions.push(eq(articles.room, f.room));
+  if (f.excludeSlug) conditions.push(sql`${articles.slug} != ${f.excludeSlug}`);
+  const where = conditions.length ? and(...conditions) : undefined;
+  const rows = await db
+    .select()
+    .from(articles)
+    .where(where)
+    .orderBy(desc(articles.publishedAt))
+    .limit(f.limit ?? 30);
+  return rows.map(toArticle);
+}
+
+/** Articles matching a tag (used by collection pages). */
+export async function listByTag(tag: string, limit = 24): Promise<Article[]> {
+  const rows = await db
+    .select()
+    .from(articles)
+    .where(
+      and(
+        inArray(articles.format, ["inspiration", "howto", "finds", "best-products", "buying-guide", "shop-the-look"] as any)
+      )
+    )
+    .orderBy(desc(articles.publishedAt))
+    .limit(limit * 3);
+  const all = rows.map(toArticle);
+  return all.filter((a) => a.tags.includes(tag)).slice(0, limit);
+}
+
+export interface SearchFilters {
+  q: string;
+  group: "all" | "design" | "organization" | "shopping";
+}
+
+export async function searchArticles({ q, group }: SearchFilters) {
+  const patterns = [`%${q}%`];
+  const likeConds = [
+    ilike(articles.title, patterns[0]),
+    ilike(articles.subtitle, patterns[0]),
+    ilike(articles.keywords, patterns[0]),
+    ilike(articles.category, patterns[0]),
+    ilike(articles.room, patterns[0]),
+  ];
+  const groupConds: SQL[] = [];
+  if (group === "design") {
+    groupConds.push(inArray(articles.format, ["inspiration", "howto"] as any));
+  } else if (group === "organization") {
+    groupConds.push(
+      or(
+        ilike(articles.category, "%Organization%"),
+        and(
+          inArray(articles.format, ["inspiration", "howto"] as any),
+          or(
+            ilike(articles.keywords, "%organiz%"),
+            ilike(articles.keywords, "%storage%"),
+            ilike(articles.keywords, "%declutter%")
+          )
+        )
+      )!
+    );
+  } else if (group === "shopping") {
+    groupConds.push(inArray(articles.format, ["finds", "best-products", "buying-guide", "shop-the-look"] as any));
+  }
+  const conditions = [or(...likeConds)!, ...groupConds];
+  const rows = await db
+    .select()
+    .from(articles)
+    .where(and(...conditions))
+    .orderBy(desc(articles.publishedAt))
+    .limit(30);
+  return rows.map(toArticle);
+}
+
+export async function getAllArticlesLite() {
+  const rows = await db.select().from(articles).orderBy(desc(articles.publishedAt));
+  return rows.map(toArticle);
+}

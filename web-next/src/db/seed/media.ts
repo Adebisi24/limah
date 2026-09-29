@@ -1,0 +1,153 @@
+/**
+ * Central image helper. All photography is served from Pexels CDN with
+ * consistent editorial crop ratios:
+ *  - rooms / heroes: 3:2  (w=1200,h=800)
+ *  - cards:          3:2  (w=900,h=600)
+ *  - products:       4:5  (w=800,h=1000)
+ */
+export const px = (id: number, w = 1200, h = 800) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=${w}&h=${h}`;
+
+/** Square-ish product crop. */
+export const prod = (id: number) => px(id, 800, 1000);
+
+export const photo = {
+  // --- Modern luxury bedrooms ---
+  luxuryA: 6585757,
+  luxuryB: 6434592,
+  luxuryC: 7546276,
+  luxuryD: 8082562,
+  luxuryE: 8135505,
+  luxuryF: 8134808,
+  luxuryG: 8135118,
+  luxuryH: 39643628,
+  luxuryI: 37436121,
+  luxuryJ: 6207940,
+  // --- Warm neutral bedrooms ---
+  neutralA: 6209460,
+  neutralB: 6899447,
+  neutralC: 18738881,
+  neutralD: 7587806,
+  neutralE: 17994859,
+  neutralF: 38697209,
+  neutralG: 14101565,
+  neutralH: 6934196,
+  neutralI: 6782578,
+  neutralJ: 10584367,
+  // --- Small bedrooms ---
+  smallA: 6636242,
+  smallB: 7045354,
+  smallC: 7546564,
+  smallD: 6180679,
+  smallE: 7614411,
+  smallF: 35419458,
+  smallG: 7060826,
+  smallH: 6934170,
+  smallI: 6980671,
+  // --- Minimal / japandi ---
+  minimalA: 7671669,
+  minimalB: 6480198,
+  minimalC: 14063721,
+  minimalD: 10130826,
+  minimalE: 6588571,
+  minimalF: 707581,
+  minimalG: 22743874,
+  minimalH: 6480210,
+  // --- Living room ---
+  livingA: 7166640,
+  livingB: 6987730,
+  livingC: 7546230,
+  livingD: 18470969,
+  livingE: 8082242,
+  livingF: 8135496,
+  livingG: 7546767,
+  livingH: 8141956,
+  // --- Kitchen ---
+  kitchenA: 6238684,
+  kitchenB: 6933769,
+  kitchenC: 7303840,
+  kitchenD: 7303776,
+  kitchenE: 7195734,
+  kitchenF: 7303797,
+  kitchenG: 36777591,
+  kitchenH: 7303777,
+  pantryA: 8580763,
+  pantryB: 6660254,
+  pantryC: 18109909,
+  pantryD: 4499231,
+  pantryE: 8940879,
+  pantryF: 10880507,
+  // --- Bathroom ---
+  bathA: 7031882,
+  bathB: 8082223,
+  bathC: 7214159,
+  bathD: 8082225,
+  bathE: 6903222,
+  bathF: 7173660,
+  bathG: 6238609,
+  bathH: 8082552,
+  // --- Lamps & lighting ---
+  lampA: 17994856,
+  lampB: 5968800,
+  lampC: 26546535,
+  lampD: 28500445,
+  lampE: 17301476,
+  lampF: 12522583,
+  lampG: 6862448,
+  lampH: 17994857,
+  lampI: 6782345,
+  sconce: 20778678,
+  // --- Bedding / textiles ---
+  beddingA: 9893931,
+  beddingB: 37098141,
+  beddingC: 11899139,
+  beddingD: 763148,
+  beddingE: 20801059,
+  beddingF: 7765002,
+  beddingG: 3872927,
+  beddingH: 31145668,
+  beddingI: 6863352,
+  // --- Rugs ---
+  rugA: 28148280,
+  rugB: 7535007,
+  rugC: 12715595,
+  rugD: 4153159,
+  rugE: 36777602,
+  rugF: 36777598,
+  rugG: 29086914,
+  // --- Baskets / storage ---
+  basketA: 10117739,
+  basketB: 8581052,
+  basketC: 15625996,
+  basketD: 29530568,
+  basketE: 19687408,
+  basketF: 9695849,
+  basketG: 21550127,
+  // --- Decor ---
+  vaseA: 6805522,
+  vaseB: 15791100,
+  vaseC: 6805521,
+  vaseD: 6952333,
+  vaseE: 38408974,
+  vaseF: 18006803,
+  vaseG: 6952339,
+  vaseH: 31493659,
+  mirrorA: 20781348,
+  mirrorB: 18955829,
+  mirrorC: 29149067,
+  mirrorD: 37143699,
+  mirrorE: 12715512,
+  mirrorF: 8218186,
+  // --- Seating / reading ---
+  chairA: 27495833,
+  chairB: 34864230,
+  chairC: 10130817,
+  chairD: 31199128,
+  chairE: 34477941,
+  // --- Curtains / windows ---
+  drapeA: 6207825,
+  drapeB: 34574607,
+  drapeC: 6970025,
+  drapeD: 7546774,
+  drapeE: 7114134,
+};

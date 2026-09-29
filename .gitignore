@@ -12,3 +12,5 @@ __pycache__/
 .sanity/
 .wrangler/
 .npm-cache/
+out/
+*.tsbuildinfo

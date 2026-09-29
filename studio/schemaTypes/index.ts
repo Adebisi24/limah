@@ -1,4 +1,5 @@
 import { defineType, defineField, defineArrayMember } from 'sanity';
+import { designBlocks } from './designBlocks';
 import { DocumentTextIcon } from '@sanity/icons/DocumentText';
 import { UserIcon } from '@sanity/icons/User';
 import { TagIcon } from '@sanity/icons/Tag';
@@ -136,6 +137,9 @@ const product = defineType({
   icon: TagIcon,
   fields: [
     title,
+    text('brand'),
+    paragraph('description'),
+    defineField({name:'specs',type:'array',of:[{type:'object',name:'specification',fields:[text('label'),text('value')]}]}),
     image('image'),
     defineField({
       name: 'matchType',
@@ -173,6 +177,9 @@ const product = defineType({
                 r.required().uri({ scheme: ['https', 'http'] }),
             }),
             text('verifiedPrice', 'Verified price label (optional)'),
+            defineField({name:'price',title:'Verified numeric price',type:'number',validation:r=>r.min(0)}),
+            defineField({name:'currency',type:'string',initialValue:'USD'}),
+            defineField({name:'unavailable',type:'boolean',initialValue:false}),
             defineField({ name: 'priceCheckedAt', type: 'datetime' }),
           ],
         }),
@@ -203,6 +210,7 @@ const article = defineType({
       options: {
         list: [
           { title: 'Inspiration Article', value: 'inspiration' },
+          { title: 'Advice / How to', value: 'howto' },
           { title: 'Shopping Finds', value: 'finds' },
           { title: 'Best Products', value: 'best' },
           { title: 'Buying Guide', value: 'guide' },
@@ -227,6 +235,12 @@ const article = defineType({
       validation: (r) => r.required(),
     }),
     { ...body, group: 'content' },
+    designBlocks,
+    { ...text('category'), group: 'story' },
+    { ...text('keywords'), group: 'story' },
+    { ...strings('tags'), group: 'story' },
+    defineField({name:'popular',type:'boolean',group:'story',initialValue:false}),
+    defineField({name:'updatedAt',type:'datetime',group:'story'}),
     defineField({
       name: 'ideas',
       type: 'array',

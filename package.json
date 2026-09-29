@@ -3,16 +3,17 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "web",
+    "web-next",
     "studio"
   ],
   "scripts": {
-    "dev": "npm run dev -w web",
-    "build": "npm run build -w web",
-    "check": "npm run check -w web",
+    "dev": "npm run dev -w web-next",
+    "build": "npm run build -w web-next",
+    "check": "npm run typecheck -w web-next",
+    "preview": "npm run preview -w web-next",
     "studio": "npm run dev -w studio",
     "studio:build": "npm run build -w studio",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs && npm run test:data -w web-next"
   },
   "overrides": {
     "adm-zip": "0.6.1",
