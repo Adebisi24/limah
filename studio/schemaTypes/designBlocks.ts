@@ -135,7 +135,7 @@ export const designBlocks = defineField({
           {
             type: 'object',
             name: 'browseItem',
-            fields: [string('name'), string('note')],
+            fields: [product, string('name'), string('note')],
           },
         ],
       }),

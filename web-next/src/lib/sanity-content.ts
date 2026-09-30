@@ -77,10 +77,14 @@ export async function loadSanityContent(): Promise<{
     if (b.product) result.productId = ids.get(b.product._ref);
     for (const field of ['items', 'picks', 'rows'])
       if (b[field])
-        result[field] = b[field].map((v: any) => ({
-          ...v,
-          productId: v.product ? ids.get(v.product._ref) : v.productId,
-        }));
+        result[field] = b[field].map((v: any) =>
+          typeof v === 'string'
+            ? v
+            : {
+                ...v,
+                productId: v.product ? ids.get(v.product._ref) : v.productId,
+              },
+        );
     return result;
   }
   const articles: Article[] = data.articles.map((a: any) => {

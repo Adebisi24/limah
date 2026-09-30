@@ -22,9 +22,11 @@ npm run preview
 
 ## Content and preserved decisions
 
-The default is a labelled, non-indexable design preview containing all 40 supplied stories, their product catalogue and source image references. Earlier local photos and demo article URLs are preserved. No sample content has been written to Sanity.
+The default is a non-indexable design preview containing the supplied stories and product catalogue. Earlier local photos and article URLs are preserved. Sanity now contains all 98 unique website articles (nine matched existing WordPress posts), 61 products, and the imported WordPress content. The WordPress migration preserved 56 published posts, 75 drafts, and 709 media records.
 
 Set `CONTENT_MODE=sanity` in `web-next/.env.local` to build from published content in the existing Limah project (`9tacupln`, `production`). Set `SITE_URL` to the approved public URL when ready. See `web-next/.env.example`. Content changes require a rebuild. Existing Studio fields remain available, with optional ordered **Designed article sections** for the imported templates.
+
+Open [Nest Nabber Studio](https://nest-nabber-limah.sanity.studio/) to edit content. Website articles use **Content → Designed article sections**. WordPress posts use **Content → Introduction / article text**. Prices and affiliate links live in **Products → Retailers**. See [the migration guide](docs/WORDPRESS_IMPORT.md) for import and verification procedures.
 
 Likes and saves stay on the reader's device. Prior saved/liked IDs migrate to the new stories. There are no reader accounts or aggregate public counts.
 

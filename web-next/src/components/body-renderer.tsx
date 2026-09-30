@@ -1,5 +1,5 @@
 import type { BodyBlock, Product } from '@/lib/types';
-import { PortableText } from '@portabletext/react';
+import { ArticleRichText } from './article-rich-text';
 import {
   Checklist,
   Comparison,
@@ -34,7 +34,7 @@ export function BodyRenderer({
           case 'portableText':
             return (
               <div key={i} className="nn-p">
-                <PortableText value={block.value} />
+                <ArticleRichText value={block.value} />
               </div>
             );
           case 'prose': {

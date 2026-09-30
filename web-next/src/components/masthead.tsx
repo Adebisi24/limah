@@ -156,6 +156,12 @@ function MastheadContent() {
                 <div
                   key={item.label}
                   className="relative"
+                  onPointerEnter={(event) => {
+                    if (event.pointerType === 'mouse') setOpenMenu(item.label);
+                  }}
+                  onPointerLeave={(event) => {
+                    if (event.pointerType === 'mouse') setOpenMenu(null);
+                  }}
                   onBlur={(e) => {
                     if (!e.currentTarget.contains(e.relatedTarget as Node))
                       setOpenMenu(null);
@@ -204,7 +210,6 @@ function MastheadContent() {
                     <div
                       id={`nav-${item.href.slice(1)}`}
                       className="absolute left-1/2 top-full z-50 w-max -translate-x-1/2 pt-2"
-                      onMouseLeave={() => setOpenMenu(null)}
                     >
                       <div
                         className={`${item.secondary ? 'w-[440px]' : 'w-[300px]'} rounded-[4px] border border-line bg-paper p-2 shadow-[0_12px_32px_rgba(34,33,31,0.10)]`}

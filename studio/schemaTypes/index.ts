@@ -74,8 +74,12 @@ const body = defineField({
       type: 'block',
       styles: [
         { title: 'Normal', value: 'normal' },
+        { title: 'Heading 1', value: 'h1' },
         { title: 'Heading', value: 'h2' },
         { title: 'Subheading', value: 'h3' },
+        { title: 'Small heading', value: 'h4' },
+        { title: 'Heading 5', value: 'h5' },
+        { title: 'Heading 6', value: 'h6' },
         { title: 'Quote', value: 'blockquote' },
       ],
       marks: {
@@ -98,6 +102,15 @@ const body = defineField({
           }),
         ],
       },
+    }),
+    image('image'),
+    defineArrayMember({
+      name: 'divider',
+      type: 'object',
+      title: 'Divider',
+      fields: [
+        defineField({ name: 'style', type: 'string', initialValue: 'line' }),
+      ],
     }),
   ],
 });
@@ -139,7 +152,17 @@ const product = defineType({
     title,
     text('brand'),
     paragraph('description'),
-    defineField({name:'specs',type:'array',of:[{type:'object',name:'specification',fields:[text('label'),text('value')]}]}),
+    defineField({
+      name: 'specs',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'specification',
+          fields: [text('label'), text('value')],
+        },
+      ],
+    }),
     image('image'),
     defineField({
       name: 'matchType',
@@ -177,9 +200,22 @@ const product = defineType({
                 r.required().uri({ scheme: ['https', 'http'] }),
             }),
             text('verifiedPrice', 'Verified price label (optional)'),
-            defineField({name:'price',title:'Verified numeric price',type:'number',validation:r=>r.min(0)}),
-            defineField({name:'currency',type:'string',initialValue:'USD'}),
-            defineField({name:'unavailable',type:'boolean',initialValue:false}),
+            defineField({
+              name: 'price',
+              title: 'Verified numeric price',
+              type: 'number',
+              validation: (r) => r.min(0),
+            }),
+            defineField({
+              name: 'currency',
+              type: 'string',
+              initialValue: 'USD',
+            }),
+            defineField({
+              name: 'unavailable',
+              type: 'boolean',
+              initialValue: false,
+            }),
             defineField({ name: 'priceCheckedAt', type: 'datetime' }),
           ],
         }),
@@ -200,6 +236,21 @@ const article = defineType({
   ],
   fields: [
     { ...title, group: 'story' },
+    {
+      ...text('legacyId', 'WordPress post ID'),
+      readOnly: true,
+      group: 'story',
+    },
+    {
+      ...text('sourceUrl', 'Original WordPress URL'),
+      readOnly: true,
+      group: 'story',
+    },
+    {
+      ...text('sourceStatus', 'Original WordPress status'),
+      readOnly: true,
+      group: 'story',
+    },
     { ...slug, group: 'story' },
     defineField({
       name: 'kind',
@@ -239,8 +290,13 @@ const article = defineType({
     { ...text('category'), group: 'story' },
     { ...text('keywords'), group: 'story' },
     { ...strings('tags'), group: 'story' },
-    defineField({name:'popular',type:'boolean',group:'story',initialValue:false}),
-    defineField({name:'updatedAt',type:'datetime',group:'story'}),
+    defineField({
+      name: 'popular',
+      type: 'boolean',
+      group: 'story',
+      initialValue: false,
+    }),
+    defineField({ name: 'updatedAt', type: 'datetime', group: 'story' }),
     defineField({
       name: 'ideas',
       type: 'array',
