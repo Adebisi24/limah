@@ -16,4 +16,4 @@ node ../node_modules/sanity/bin/sanity exec ../scripts/verify-wordpress.ts --wit
 
 The importer skips existing article IDs, slugs or titles, rather than replacing an editor's work. Review any skipped or failed records in the report. A failed image prevents its article from being created with incomplete content. Reruns reuse uploaded media from the checkpoint.
 
-The Studio is hosted at https://nest-nabber-limah.sanity.studio/. Importing does not switch the public website from its existing content mode. Switching to `CONTENT_MODE=sanity` requires a separate website build and editorial review of room assignments and article formats.
+The Studio is hosted at https://nest-nabber-limah.sanity.studio/. Website builds now use published Sanity content. Importing or editing content requires a new website build before the change appears online. Drafts remain excluded. Room assignments and article formats can be reviewed and adjusted in Studio.

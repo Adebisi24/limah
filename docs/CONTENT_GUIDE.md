@@ -7,10 +7,10 @@
 5. Inspiration articles use the Ideas array for each image, heading, and paragraph. Buying Guides use Guide Sections for advice, checklists, and diagrams/images. Shopping formats use product references plus article-specific editorial notes. Best Products includes methodology and pros/cons; Shopping Finds hides those extra details on the website.
 6. Select preferred related articles if needed. Otherwise the site chooses other articles of the relevant format, prioritizing the same room. It shows only available content and never duplicates a card just to fill a count. Maximums follow the approved layouts: 12/8 or 8 looks. Plan Your Room accepts up to eight article references and always renders text-only links.
 7. Open Site Settings to select the homepage feature and latest stories, brand text, description, and contact address.
-8. Publish the documents. Configure `CONTENT_MODE=sanity` and `SITE_URL` for the website build, then rebuild. A later Cloudflare deploy hook can automate this step.
+8. Publish the documents, then rebuild the website. Published Sanity content is always used; drafts stay private to the editorial workflow. A later Cloudflare deploy hook can automate rebuilding.
 
 All current website articles and products have been copied to Sanity, along with the WordPress export. To edit an imported website article, open **Content → Designed article sections**; keep their order to preserve its layout. WordPress posts use **Content → Introduction / article text**, including inline images and captions. Edit product prices and affiliate links under **Products → Retailers**.
 
-For Cloudflare to show CMS edits, set `CONTENT_MODE=sanity`, `PUBLIC_SANITY_PROJECT_ID=9tacupln`, and `PUBLIC_SANITY_DATASET=production` in its build environment. Set `SITE_URL` to the deployed website URL, then rebuild. Publishing in Studio does not automatically rebuild Cloudflare until a deploy hook is configured. Draft articles are excluded from the published website.
+Cloudflare builds automatically use Sanity; an older `CONTENT_MODE=demo` variable is ignored by the Next.js configuration. The default project is `9tacupln`, dataset `production`. Set `SITE_URL` to the deployed website URL for canonical links and indexing. Publishing in Studio does not automatically rebuild Cloudflare until a deploy hook is configured. Draft articles are excluded from the published website.
 
 No reader accounts are used. Saved articles and likes remain on each browser. Newsletter signup remains inactive until a sending service is connected.
