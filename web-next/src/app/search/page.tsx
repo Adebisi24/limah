@@ -16,7 +16,9 @@ export default async function SearchPage() {
         </section>
       }
     >
-      <SearchResults articles={articles} />
+      <SearchResults
+        articles={articles.map((article) => ({ ...article, body: [] }))}
+      />
     </Suspense>
   );
 }

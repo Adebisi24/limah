@@ -2,6 +2,10 @@
 import fs from 'node:fs';
 import { JSDOM } from 'jsdom';
 import { getCliClient } from 'sanity/cli';
+import {
+  prepareWordPressContent,
+  wordpressIdentities,
+} from './wordpress-content';
 
 const source = process.argv.find((arg) => arg.endsWith('.xml'));
 if (!source) throw new Error('Pass the source XML path.');
@@ -27,6 +31,7 @@ const docs = rawDocs.filter(
     !rawDocs.some((other: any) => other._id === doc._id.slice(7)),
 );
 const errors: string[] = [];
+const identities = wordpressIdentities(posts, get);
 const normalize = (s: string) => s.replace(/\s+/g, '');
 for (const post of posts) {
   const id = get(post, 'wp:post_id');
@@ -36,7 +41,12 @@ for (const post of posts) {
     continue;
   }
   const d = matches[0];
-  const dom = new JSDOM(get(post, 'content:encoded'));
+  const prepared = prepareWordPressContent(
+    get(post, 'content:encoded'),
+    get(post, 'title'),
+    identities.get(id)!.slug,
+  );
+  const dom = prepared.dom;
   const sourceImages = dom.window.document.querySelectorAll('img').length;
   dom.window.document
     .querySelectorAll('script,style,figcaption')
@@ -56,10 +66,15 @@ for (const post of posts) {
   )
     errors.push(`${id}: missing inline images`);
   if (d.hero && !d.heroAsset) errors.push(`${id}: broken hero image`);
-  if ((get(post, 'wp:status') !== 'publish') !== d._id.startsWith('drafts.'))
+  if (
+    (!process.argv.includes('--publish-all') &&
+      get(post, 'wp:status') !== 'publish') !== d._id.startsWith('drafts.')
+  )
     errors.push(`${id}: publication state differs`);
   if (get(post, 'title').trim() && get(post, 'title').trim() !== d.title)
     errors.push(`${id}: title differs`);
+  if (d.title !== prepared.title || d.slug.current !== prepared.slug)
+    errors.push(`${id}: title or slug differs from prepared article`);
   dom.window.close();
 }
 const summary = {

@@ -34,6 +34,14 @@ const components: PortableTextComponents = {
     h1: ({ children }) => <h2 className="nn-h2">{children}</h2>,
     h2: ({ children }) => <h2 className="nn-h2">{children}</h2>,
     h3: ({ children }) => <h3 className="nn-h3">{children}</h3>,
+    h4: ({ children }) => <h4 className="nn-h3">{children}</h4>,
+    h5: ({ children }) => <h5 className="nn-h3">{children}</h5>,
+    h6: ({ children }) => <h6 className="nn-h3">{children}</h6>,
+    blockquote: ({ children }) => (
+      <blockquote className="my-6 border-l-2 border-line pl-5 italic">
+        {children}
+      </blockquote>
+    ),
   },
   list: {
     bullet: ({ children }) => (

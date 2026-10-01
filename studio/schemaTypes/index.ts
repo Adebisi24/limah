@@ -278,7 +278,12 @@ const article = defineType({
       group: 'story',
       validation: (r) => r.required().max(300),
     },
-    { ...image('hero'), group: 'story', validation: (r) => r.required() },
+    {
+      ...image('hero'),
+      group: 'story',
+      description:
+        'Optional for text-only articles. Add a cover image when one is available.',
+    },
     { ...ref('author', 'author'), group: 'story' },
     { ...ref('room', 'room'), group: 'story' },
     { ...refs('styles', 'style'), group: 'story' },

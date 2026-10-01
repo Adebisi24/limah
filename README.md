@@ -22,7 +22,7 @@ npm run preview
 
 ## Content and preserved decisions
 
-The website builds exclusively from published Sanity content: 98 project articles and 61 products. The WordPress import was removed on October 1, 2026, and nine overlapping articles were restored to their original project versions. Drafts are excluded from the public website. The article list has no local demo fallback.
+The website builds exclusively from published Sanity content. The 131 article posts from the WordPress export are imported as editable Sanity articles alongside project content and 61 products. Matching project articles are updated rather than duplicated. Only article-referenced media is imported; pages, menus, plugins, and unrelated media are excluded. The article list has no local demo fallback.
 
 The Next.js configuration uses Sanity for all website builds, including hosts that still have an old `CONTENT_MODE=demo` variable. The existing Limah project is `9tacupln`, dataset `production`. Set `SITE_URL` to the public website URL for canonical links and indexing; builds without it remain non-indexable. See `web-next/.env.example`. Published content changes automatically trigger Cloudflare through the Sanity webhook; changes appear after the deployment succeeds. Draft edits do not trigger builds. Existing Studio fields remain available, with optional ordered **Designed article sections** for the imported templates.
 

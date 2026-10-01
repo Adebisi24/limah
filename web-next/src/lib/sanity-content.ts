@@ -43,18 +43,29 @@ export async function loadSanityContent(): Promise<{
 }> {
   const data = await client.fetch(
     `{
-    "articles": *[_type == "article" && defined(slug.current)] | order(publishedAt desc){
-      ..., "slug":slug.current, "roomSlug":room->slug.current, "roomName":room->title,
-      "authorName":author->name, "authorBio":author->bio,
-      "styleTags":styles[]->slug.current,
-      "relatedSlugs":related[]->slug.current,
-      "planLinks":planLinks[]->{title,"slug":slug.current}
-    },
+    "articleCount": count(*[_type == "article" && defined(slug.current)]),
     "products": *[_type == "product"] | order(_id asc)
   }`,
     {},
     fetchOptions,
   );
+  // Keep each response below Next.js's 2 MiB cache limit as the library grows.
+  const articleDocuments: any[] = [];
+  const pageSize = 20;
+  for (let start = 0; start < data.articleCount; start += pageSize) {
+    const page = await client.fetch(
+      `*[_type == "article" && defined(slug.current)] | order(_id asc)[${start}...${start + pageSize}]{
+        ..., "slug":slug.current, "roomSlug":room->slug.current, "roomName":room->title,
+        "authorName":author->name, "authorBio":author->bio,
+        "styleTags":styles[]->slug.current,
+        "relatedSlugs":related[]->slug.current,
+        "planLinks":planLinks[]->{title,"slug":slug.current}
+      }`,
+      {},
+      fetchOptions,
+    );
+    articleDocuments.push(...page);
+  }
   const ids = new Map<string, number>(
     data.products.map((p: any, i: number) => [p._id, i + 1]),
   );
@@ -99,7 +110,7 @@ export async function loadSanityContent(): Promise<{
         );
     return result;
   }
-  const articles: Article[] = data.articles.map((a: any) => {
+  const articles: Article[] = articleDocuments.map((a: any) => {
     const format = formats[a.kind] ?? 'inspiration';
     const body: BodyBlock[] = [];
     if (a.designBlocks?.length) body.push(...a.designBlocks.map(designBlock));

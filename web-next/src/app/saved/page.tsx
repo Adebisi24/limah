@@ -27,7 +27,9 @@ export default async function SavedPage() {
       </section>
 
       <section className="container-nn py-10">
-        <SavedList articles={all} />
+        <SavedList
+          articles={all.map((article) => ({ ...article, body: [] }))}
+        />
       </section>
 
       <NewsletterBand />

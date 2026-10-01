@@ -1,6 +1,7 @@
 /** Run from studio with sanity exec ../scripts/import-wordpress.ts --with-user-token -- <xml> [--write].
  * The XML and local checkpoint contain source content and stay outside Git.
- * Reruns skip existing posts; they never replace an editor's work.
+ * Reruns skip already imported posts. --replace-project-matches explicitly replaces
+ * matching original project placeholders; --articles-only excludes unrelated media.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,10 +11,20 @@ import { htmlToBlocks } from '@portabletext/block-tools';
 import { Schema } from '@sanity/schema';
 import { getCliClient } from 'sanity/cli';
 import { schemaTypes } from '../studio/schemaTypes';
+import {
+  prepareWordPressContent,
+  wordpressIdentities,
+} from './wordpress-content';
 
 const source = process.argv.find((arg) => arg.endsWith('.xml'));
 if (!source) throw new Error('Pass a WordPress XML export path.');
 const write = process.argv.includes('--write');
+const articlesOnly = process.argv.includes('--articles-only');
+const publishTitled = process.argv.includes('--publish-titled');
+const publishAll = process.argv.includes('--publish-all');
+const replaceProjectMatches = process.argv.includes(
+  '--replace-project-matches',
+);
 const client = getCliClient({ apiVersion: '2026-09-24' }).withConfig({
   useCdn: false,
   perspective: 'raw',
@@ -90,8 +101,23 @@ const bodyType = schema
   .get('article')
   .fields.find((f: any) => f.name === 'body').type;
 const existing: any[] = await client.fetch(
-  '*[_type=="article"]{_id,title,slug,legacyId}',
+  '*[_type=="article"]{_id,_rev,title,slug,legacyId,sourceStatus}',
 );
+// Assets may have been removed since a previous import. Never reuse stale IDs.
+const liveAssetIds = new Set(
+  await client.fetch('*[_type=="sanity.imageAsset"]._id'),
+);
+for (const [url, id] of Object.entries(cache))
+  if (!liveAssetIds.has(id)) delete cache[url];
+if (write) {
+  const backup = await client.fetch(
+    '*[!(_type in ["sanity.imageAsset", "sanity.fileAsset"])]',
+  );
+  fs.writeFileSync(
+    path.join(cacheDir, 'before-article-import-' + Date.now() + '.ndjson'),
+    backup.map((d: any) => JSON.stringify(d)).join('\n') + '\n',
+  );
+}
 console.log(
   JSON.stringify({
     posts: posts.length,
@@ -163,38 +189,50 @@ async function pool<T>(
 }
 
 // Copy the original media library; posts additionally reference the exact corresponding assets.
-await pool(attachments, async (a) => {
-  const url = get(a, 'wp:attachment_url');
-  try {
-    const image = await upload(
-      url,
-      metadata(a, '_wp_attachment_image_alt'),
-      get(a, 'excerpt:encoded'),
-    );
-    report.media.push({
-      wordpressId: get(a, 'wp:post_id'),
-      url,
-      assetId: image.asset._ref,
-    });
-  } catch (error) {
-    report.errors.push({ type: 'media', url, error: String(error) });
-  }
-  if (report.media.length % 50 === 0)
-    console.log(`Media copied: ${report.media.length}/${attachments.length}`);
-  saveReport();
-});
+if (!articlesOnly)
+  await pool(attachments, async (a) => {
+    const url = get(a, 'wp:attachment_url');
+    try {
+      const image = await upload(
+        url,
+        metadata(a, '_wp_attachment_image_alt'),
+        get(a, 'excerpt:encoded'),
+      );
+      report.media.push({
+        wordpressId: get(a, 'wp:post_id'),
+        url,
+        assetId: image.asset._ref,
+      });
+    } catch (error) {
+      report.errors.push({ type: 'media', url, error: String(error) });
+    }
+    if (report.media.length % 50 === 0)
+      console.log(`Media copied: ${report.media.length}/${attachments.length}`);
+    saveReport();
+  });
 
-let authors: any[] = await client.fetch('*[_type=="author"]{_id,name}');
+const authors: any[] = await client.fetch('*[_type=="author"]{_id,name}');
+const rooms: any[] = await client.fetch('*[_type=="room"]{_id,slug}');
+const identities = wordpressIdentities(posts, get);
+const importedSlugs = new Set([...identities.values()].map((p) => p.slug));
 for (const post of posts) {
   const legacyId = get(post, 'wp:post_id');
-  const title =
-    get(post, 'title').trim() || `Untitled WordPress draft ${legacyId}`;
-  const slug = get(post, 'wp:post_name') || `wordpress-${legacyId}`;
-  const match = existing.find(
-    (a) =>
-      a.legacyId === legacyId || a.slug?.current === slug || a.title === title,
+  const prepared = prepareWordPressContent(
+    get(post, 'content:encoded'),
+    get(post, 'title'),
+    identities.get(legacyId)!.slug,
   );
-  if (match) {
+  const { title, slug } = prepared;
+  const match = existing.find(
+    (a) => a.legacyId === legacyId || a.slug?.current === slug,
+  );
+  const replaceMatch =
+    match &&
+    replaceProjectMatches &&
+    match.sourceStatus === 'website-import' &&
+    !match._id.startsWith('drafts.');
+  if (match && !replaceMatch) {
+    prepared.dom.window.close();
     report.posts.push({
       legacyId,
       title,
@@ -204,9 +242,22 @@ for (const post of posts) {
     continue;
   }
   try {
-    const dom = new JSDOM(get(post, 'content:encoded'));
-    const doc = dom.window.document;
-    doc.querySelectorAll('script,style').forEach((el) => el.remove());
+    const { dom, doc } = prepared;
+    // Links between imported posts should stay on this project after migration.
+    doc.querySelectorAll('a[href]').forEach((el) => {
+      try {
+        const url = new URL(el.getAttribute('href')!, 'https://nestnabber.com');
+        const sourceSlug = url.pathname.split('/').filter(Boolean).at(-1);
+        if (
+          ['nestnabber.com', 'www.nestnabber.com'].includes(url.hostname) &&
+          sourceSlug &&
+          importedSlugs.has(sourceSlug)
+        )
+          el.setAttribute('href', '/story/' + sourceSlug + '/' + url.hash);
+      } catch {
+        /* Keep unusual links as source text; the renderer validates schemes. */
+      }
+    });
     const imageMap = new Map<Element, any>();
     const images = [...doc.querySelectorAll('img')];
     for (const img of images) {
@@ -219,7 +270,10 @@ for (const post of posts) {
         : img.getAttribute('data-src') || img.getAttribute('src') || '';
       const caption =
         img.closest('figure')?.querySelector('figcaption')?.textContent || '';
-      imageMap.set(img, await upload(src, img.alt, caption));
+      imageMap.set(
+        img,
+        await upload(src, img.alt || caption || title, caption),
+      );
     }
     // Conversion reparses HTML, so stable markers carry uploaded images into the deserializer.
     const imageValues: any[] = [];
@@ -274,8 +328,20 @@ for (const post of posts) {
         ? new Date(value.replace(' ', 'T') + 'Z').toISOString()
         : undefined;
     const publishedAt =
-      iso(get(post, 'wp:post_date_gmt')) || iso(get(post, 'wp:post_date'));
+      iso(get(post, 'wp:post_date_gmt')) ||
+      iso(get(post, 'wp:post_date')) ||
+      new Date().toISOString();
     const status = get(post, 'wp:status');
+    const publish =
+      publishAll ||
+      status === 'publish' ||
+      (publishTitled && Boolean(get(post, 'title').trim()));
+    const categoryText = categories.join(' ').toLowerCase();
+    const roomSlug =
+      ['bedroom', 'living-room', 'kitchen', 'bathroom', 'entryway'].find((r) =>
+        categoryText.includes(r.replaceAll('-', ' ')),
+      ) || 'whole-home';
+    const room = rooms.find((r) => r.slug?.current === roomSlug);
     const article: any = {
       _type: 'article',
       legacyId,
@@ -285,6 +351,9 @@ for (const post of posts) {
       slug: { _type: 'slug', current: slug },
       kind: 'inspiration',
       excerpt,
+      ...(prepared.seoDescription
+        ? { seoDescription: prepared.seoDescription }
+        : {}),
       body,
       category: categories[0] || 'Interior Design',
       tags,
@@ -292,19 +361,42 @@ for (const post of posts) {
       updatedAt: iso(get(post, 'wp:post_modified_gmt')),
       ...(hero ? { hero } : {}),
       ...(author ? { author: { _type: 'reference', _ref: author._id } } : {}),
+      ...(room ? { room: { _type: 'reference', _ref: room._id } } : {}),
     };
-    if (status !== 'publish') article._id = 'drafts.' + randomUUID();
-    const result = write ? await client.create(article) : article;
+    if (!publish) article._id = 'drafts.' + randomUUID();
+    const result = write
+      ? replaceMatch
+        ? await client
+            .patch(match._id)
+            .ifRevisionId(match._rev)
+            .set(
+              Object.fromEntries(
+                Object.entries(article).filter(([key]) => !key.startsWith('_')),
+              ),
+            )
+            .unset([
+              'designBlocks',
+              'ideas',
+              'guideSections',
+              'products',
+              'methodology',
+            ])
+            .commit()
+        : await client.create(article)
+      : article;
     existing.push(result);
     report.posts.push({
       legacyId,
       title,
       slug,
       id: result._id,
-      status: status === 'publish' ? 'published' : 'draft',
+      status: publish ? 'published' : 'draft',
       images: imageValues.length,
       blocks: body.length,
       missingHero: !hero,
+      derivedTitle: !get(post, 'title').trim(),
+      replacedProject: Boolean(replaceMatch),
+      removedMetadata: prepared.removedMetadata,
     });
     dom.window.close();
     console.log(`Imported ${report.posts.length}/${posts.length}: ${title}`);
@@ -315,6 +407,7 @@ for (const post of posts) {
   saveReport();
 }
 report.finishedAt = new Date().toISOString();
+report.referencedImages = pending.size;
 saveReport();
 console.log(
   JSON.stringify({

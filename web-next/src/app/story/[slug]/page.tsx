@@ -207,12 +207,17 @@ export default async function ArticlePage({
       </div>
 
       {/* Hero */}
-      <figure className="container-nn mt-10">
-        <div className="card-media aspect-[16/9]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={article.imageUrl} alt={article.imageAlt ?? article.title} />
-        </div>
-      </figure>
+      {article.imageUrl !== '/placeholder.svg' && (
+        <figure className="container-nn mt-10">
+          <div className="card-media aspect-[16/9]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={article.imageUrl}
+              alt={article.imageAlt ?? article.title}
+            />
+          </div>
+        </figure>
+      )}
 
       <div className="container-nn py-10">
         <div className="mx-auto max-w-[660px]">

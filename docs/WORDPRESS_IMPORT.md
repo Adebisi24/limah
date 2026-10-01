@@ -1,21 +1,21 @@
-# WordPress migration
+# Article-only WordPress import
 
-Historical procedure only: the import was removed from Sanity on October 1, 2026 at the owner's request. Do not rerun it as part of normal publishing. The website uses Sanity directly. Document backups from before removal are kept in the local, gitignored `.migration/` directory; the original XML remains outside the repository.
+All 131 post records were approved for publication, including former drafts. Ten missing titles are derived from article headings, with collision-free URLs. Only post records and their referenced images are imported. Pages, menus, plugins, comments, and unrelated media are excluded.
 
-The importer copies WordPress `post` records into the Limah project's `production` dataset. Published posts remain published; other posts become Sanity drafts. Pages, menus, plugin configuration, comments, and contact form data are not imported as articles.
+Text, links, headings, lists, dates, categories, authors, captions, and alt text become editable Sanity fields. Escaped SEO notes are removed from reader-facing text and descriptions go into SEO fields. Internal post links point to this project. Cover images use the original thumbnail or first inline image; image-free posts remain text-only.
 
-Original titles, slugs, text, links, headings, lists, dates, categories/tags, authors, image captions and alternative text are preserved. Untitled drafts receive a label containing their WordPress ID. Featured images are matched using `_thumbnail_id`; inline images use attachment IDs or their source URL. A first inline image is used only when WordPress has no featured image. No new editorial content is generated.
+XML, backups, reports, and media checkpoints stay outside Git or in .migration. Cached assets are checked before reuse. Reruns skip already imported articles to preserve editor changes. The explicit --replace-project-matches option replaces matching project placeholders only.
 
-Media are downloaded from the URLs in the XML and uploaded to Sanity's asset storage. WordPress must remain accessible until migration verification succeeds. Asset checkpoints and detailed reports are saved in the ignored `.migration/` folder; the XML is not committed to Git.
-
-From `studio/`, rehearse, import, and verify:
+From studio/, rehearse:
 
 ```sh
-node ../node_modules/sanity/bin/sanity exec ../scripts/import-wordpress.ts --with-user-token -- /absolute/path/export.xml
-node ../node_modules/sanity/bin/sanity exec ../scripts/import-wordpress.ts --with-user-token -- /absolute/path/export.xml --write
-node ../node_modules/sanity/bin/sanity exec ../scripts/verify-wordpress.ts --with-user-token -- /absolute/path/export.xml
+node ../node_modules/sanity/bin/sanity exec ../scripts/import-wordpress.ts --with-user-token -- /absolute/path/export.xml --articles-only --publish-all --replace-project-matches
 ```
 
-The importer skips existing article IDs, slugs or titles, rather than replacing an editor's work. Review any skipped or failed records in the report. A failed image prevents its article from being created with incomplete content. Reruns reuse uploaded media from the checkpoint.
+For an authorized bulk import, pause the publishing webhook, add --write, then restore the webhook in a finally block. Verify before triggering one deployment:
 
-The Studio is hosted at https://nest-nabber-limah.sanity.studio/. Website builds now use published Sanity content. Importing or editing content requires a new website build before the change appears online. Drafts remain excluded. Room assignments and article formats can be reviewed and adjusted in Studio.
+```sh
+node ../node_modules/sanity/bin/sanity exec ../scripts/verify-wordpress.ts --with-user-token -- /absolute/path/export.xml --publish-all
+```
+
+Normal editing never requires the importer. Edit in Studio and click Publish; the webhook rebuilds Cloudflare automatically. See CONTENT_GUIDE.md.
