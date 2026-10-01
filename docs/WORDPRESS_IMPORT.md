@@ -1,5 +1,7 @@
 # WordPress migration
 
+Historical procedure only: the import was removed from Sanity on October 1, 2026 at the owner's request. Do not rerun it as part of normal publishing. The website uses Sanity directly. Document backups from before removal are kept in the local, gitignored `.migration/` directory; the original XML remains outside the repository.
+
 The importer copies WordPress `post` records into the Limah project's `production` dataset. Published posts remain published; other posts become Sanity drafts. Pages, menus, plugin configuration, comments, and contact form data are not imported as articles.
 
 Original titles, slugs, text, links, headings, lists, dates, categories/tags, authors, image captions and alternative text are preserved. Untitled drafts receive a label containing their WordPress ID. Featured images are matched using `_thumbnail_id`; inline images use attachment IDs or their source URL. A first inline image is used only when WordPress has no featured image. No new editorial content is generated.

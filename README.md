@@ -22,11 +22,11 @@ npm run preview
 
 ## Content and preserved decisions
 
-The website builds from published Sanity content. Earlier local photos and article URLs are preserved. Sanity contains all 98 unique website articles (nine matched existing WordPress posts), 61 products, and the imported WordPress content. The WordPress migration preserved 56 published posts, 75 drafts, and 709 media records. Drafts are excluded from the public website.
+The website builds exclusively from published Sanity content: 98 project articles and 61 products. The WordPress import was removed on October 1, 2026, and nine overlapping articles were restored to their original project versions. Drafts are excluded from the public website. The article list has no local demo fallback.
 
 The Next.js configuration uses Sanity for all website builds, including hosts that still have an old `CONTENT_MODE=demo` variable. The existing Limah project is `9tacupln`, dataset `production`. Set `SITE_URL` to the public website URL for canonical links and indexing; builds without it remain non-indexable. See `web-next/.env.example`. Content changes require a rebuild. Existing Studio fields remain available, with optional ordered **Designed article sections** for the imported templates.
 
-Open [Nest Nabber Studio](https://nest-nabber-limah.sanity.studio/) to edit content. Website articles use **Content → Designed article sections**. WordPress posts use **Content → Introduction / article text**. Prices and affiliate links live in **Products → Retailers**. See [the migration guide](docs/WORDPRESS_IMPORT.md) for import and verification procedures.
+Open [Nest Nabber Studio](https://nest-nabber-limah.sanity.studio/) to edit content. Existing project articles use **Content → Designed article sections**. New articles can use **Content → Introduction / article text** and format-specific sections. Prices and affiliate links live in **Products → Retailers**. See [the content guide](docs/CONTENT_GUIDE.md) for editing and publishing.
 
 Likes and saves stay on the reader's device. Prior saved/liked IDs migrate to the new stories. There are no reader accounts or aggregate public counts.
 

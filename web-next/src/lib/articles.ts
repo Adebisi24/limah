@@ -1,13 +1,8 @@
-import { legacyArticles } from './legacy-content';
-import { demoArticles, demoProducts } from './demo-content';
 import type { Article, ArticleFormat, BodyBlock, Product } from './types';
 import { loadSanityContent } from './sanity-content';
 let cached: Promise<{ articles: Article[]; products: Product[] }>;
 function content() {
-  return (cached ??=
-    process.env.CONTENT_MODE === 'sanity'
-      ? loadSanityContent()
-      : Promise.resolve({ articles: demoArticles, products: demoProducts }));
+  return (cached ??= loadSanityContent());
 }
 export function productIdsFromBody(body: BodyBlock[]) {
   const ids = new Set<number>();
@@ -66,7 +61,5 @@ export async function getAllArticlesLite() {
 }
 
 export async function getReadableArticles() {
-  const current = await getAllArticlesLite();
-  const slugs = new Set(current.map((a) => a.slug));
-  return [...current, ...legacyArticles().filter((a) => !slugs.has(a.slug))];
+  return getAllArticlesLite();
 }

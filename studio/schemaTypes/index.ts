@@ -237,18 +237,21 @@ const article = defineType({
   fields: [
     { ...title, group: 'story' },
     {
-      ...text('legacyId', 'WordPress post ID'),
+      ...text('legacyId', 'Legacy import ID'),
       readOnly: true,
+      hidden: true,
       group: 'story',
     },
     {
-      ...text('sourceUrl', 'Original WordPress URL'),
+      ...text('sourceUrl', 'Original source URL'),
       readOnly: true,
+      hidden: true,
       group: 'story',
     },
     {
-      ...text('sourceStatus', 'Original WordPress status'),
+      ...text('sourceStatus', 'Import source'),
       readOnly: true,
+      hidden: true,
       group: 'story',
     },
     { ...slug, group: 'story' },

@@ -33,7 +33,11 @@ for (const [slug, article] of expected) {
   const matches = data.articles.filter((a) => a.slug?.current === slug);
   assert.equal(matches.length, 1, `One published article for ${slug}`);
   const doc = matches[0];
-  if (doc.sourceStatus !== 'website-import') continue; // Preserve the full WordPress article.
+  assert.equal(
+    doc.legacyId,
+    undefined,
+    `${slug}: no WordPress import metadata`,
+  );
   assert.equal(doc.title, article.title, `${slug}: title`);
   assert.equal(
     doc.designBlocks.length,
@@ -135,9 +139,8 @@ const summary = {
   verifiedWebsiteArticles: expected.size,
   verifiedProducts: source.products.length,
   verifiedSections: sections,
-  wordPressMatches: report.articles.filter(
-    (a) => a.status === 'matched-existing',
-  ).length,
+  remainingWordPressArticles: data.articles.filter((a) => a.legacyId != null)
+    .length,
 };
 fs.writeFileSync(
   '.migration/site-verification.json',

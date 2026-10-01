@@ -9,6 +9,14 @@ const client = createClient({
   useCdn: false,
   perspective: 'published',
 });
+// Static export needs cacheable requests. A build-specific header changes the
+// Next.js fetch-cache key so published edits and deletions appear on every build.
+const fetchOptions = {
+  cache: 'force-cache' as const,
+  headers: {
+    'X-Nest-Nabber-Build': process.env.SANITY_BUILD_ID || 'development',
+  },
+};
 const image = (value: any) =>
   value?.asset
     ? createImageUrlBuilder(client)
@@ -33,7 +41,8 @@ export async function loadSanityContent(): Promise<{
   articles: Article[];
   products: Product[];
 }> {
-  const data = await client.fetch(`{
+  const data = await client.fetch(
+    `{
     "articles": *[_type == "article" && defined(slug.current)] | order(publishedAt desc){
       ..., "slug":slug.current, "roomSlug":room->slug.current, "roomName":room->title,
       "authorName":author->name, "authorBio":author->bio,
@@ -42,7 +51,10 @@ export async function loadSanityContent(): Promise<{
       "planLinks":planLinks[]->{title,"slug":slug.current}
     },
     "products": *[_type == "product"] | order(_id asc)
-  }`);
+  }`,
+    {},
+    fetchOptions,
+  );
   const ids = new Map<string, number>(
     data.products.map((p: any, i: number) => [p._id, i + 1]),
   );
@@ -187,6 +199,8 @@ export async function getSiteSettings() {
   if (process.env.CONTENT_MODE !== 'sanity') return defaults;
   const settings = await client.fetch(
     `*[_type=="siteSettings"][0]{contactEmail,"featuredArticle":featuredArticle->slug.current,"latestArticles":latestArticles[]->slug.current}`,
+    {},
+    fetchOptions,
   );
   return {
     ...defaults,

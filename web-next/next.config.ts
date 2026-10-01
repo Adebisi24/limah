@@ -2,7 +2,11 @@ import type { NextConfig } from 'next';
 import path from 'node:path';
 const config: NextConfig = {
   // Published Sanity content is authoritative, including on hosts with old preview variables.
-  env: { CONTENT_MODE: 'sanity' },
+  env: {
+    CONTENT_MODE: 'sanity',
+    // Share content within a static build, never reuse a previous build's responses.
+    SANITY_BUILD_ID: new Date().toISOString(),
+  },
   turbopack: { root: path.resolve(process.cwd(), '..') },
   outputFileTracingRoot: path.resolve(process.cwd(), '..'),
   output: 'export',
