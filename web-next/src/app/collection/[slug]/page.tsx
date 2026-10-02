@@ -4,6 +4,12 @@ import { notFound } from 'next/navigation';
 import { listArticles } from '@/lib/articles';
 import { StandardCard, SectionHeader } from '@/components/cards';
 import { NewsletterBand, Breadcrumbs } from '@/components/chrome';
+import {
+  ARTICLE_COLLECTIONS,
+  ARTICLE_COLLECTION_GROUPS,
+  getArticleCollection,
+  getArticleCollectionGroup,
+} from '../../../../../article-collections';
 
 interface CollectionDef {
   title: string;
@@ -193,6 +199,26 @@ const COLLECTIONS: Record<string, CollectionDef> = {
   },
 };
 
+function resolveCollection(slug: string): CollectionDef | undefined {
+  if (COLLECTIONS[slug]) return COLLECTIONS[slug];
+  const collection = getArticleCollection(slug);
+  const group = getArticleCollectionGroup(slug);
+  if (!collection || !group) return undefined;
+  return {
+    title: collection.title,
+    desc: `Browse every Nest Nabber story filed under ${collection.title}.`,
+    tags: [slug],
+    family: group.children.map((item) => ({
+      label: item.title,
+      href: `/collection/${item.slug}`,
+    })),
+    crumb:
+      slug === 'home'
+        ? { label: 'Home', href: '/' }
+        : { label: group.title, href: group.href },
+  };
+}
+
 export function generateMetadata({
   params,
 }: {
@@ -200,7 +226,7 @@ export function generateMetadata({
 }): Promise<Metadata> {
   const slug = params.then((p) => p.slug);
   return Promise.resolve(slug).then((s) => {
-    const def = COLLECTIONS[s];
+    const def = resolveCollection(s);
     return def
       ? { title: def.title, description: def.desc }
       : { title: 'Collection' };
@@ -213,13 +239,15 @@ export default async function CollectionPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const def = COLLECTIONS[slug];
+  const def = resolveCollection(slug);
   if (!def) notFound();
 
-  const all = await listArticles({ limit: 60 });
-  const articles = all
-    .filter((a) => def.tags.some((t) => a.tags.includes(t)))
-    .slice(0, 12);
+  const all = await listArticles({ limit: 500 });
+  const articles = all.filter(
+    (article) =>
+      article.collections.includes(slug) ||
+      def.tags.some((tag) => article.tags.includes(tag)),
+  );
 
   return (
     <>
@@ -284,5 +312,12 @@ export default async function CollectionPage({
 }
 
 export function generateStaticParams() {
-  return Object.keys(COLLECTIONS).map((slug) => ({ slug }));
+  const groupSlugs = new Set(
+    ARTICLE_COLLECTION_GROUPS.map((group) => group.slug).filter(
+      (slug) => slug !== 'home',
+    ),
+  );
+  return ARTICLE_COLLECTIONS.filter(
+    (collection) => !groupSlugs.has(collection.slug),
+  ).map(({ slug }) => ({ slug }));
 }

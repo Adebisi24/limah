@@ -6,6 +6,7 @@ import { TagIcon } from '@sanity/icons/Tag';
 import { CogIcon } from '@sanity/icons/Cog';
 import { ImageIcon } from '@sanity/icons/Image';
 import { SITE_AUTHOR_ID } from '../siteAuthor';
+import { ARTICLE_COLLECTIONS } from '../../article-collections';
 const text = (name: string, title?: string) =>
   defineField({ name, title, type: 'string' });
 const paragraph = (name: string, title?: string) =>
@@ -304,7 +305,38 @@ const article = defineType({
     }),
     { ...body, group: 'content' },
     designBlocks,
-    { ...text('category'), group: 'story' },
+    defineField({
+      name: 'collections',
+      title: 'Collections',
+      description:
+        'Choose every relevant collection. Use the broad section and the most specific related topics.',
+      type: 'array',
+      group: 'story',
+      of: [defineArrayMember({ type: 'string' })],
+      options: {
+        list: ARTICLE_COLLECTIONS.map((collection) => ({
+          title: `${collection.group} — ${collection.title}`,
+          value: collection.slug,
+        })),
+      },
+      validation: (rule) => rule.required().min(1).unique(),
+    }),
+    {
+      ...text('category', 'Display category'),
+      group: 'story',
+      description: 'The short category label shown on article cards.',
+      options: {
+        list: [
+          'Home',
+          'Interior Design',
+          'Home Organization',
+          'Shopping Finds',
+          'Best Products',
+          'Buying Guide',
+          'Shop the Look',
+        ],
+      },
+    },
     { ...text('keywords'), group: 'story' },
     { ...strings('tags'), group: 'story' },
     defineField({

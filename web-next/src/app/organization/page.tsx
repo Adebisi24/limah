@@ -23,8 +23,10 @@ const CATEGORIES = [
 ];
 
 export default async function OrganizationPage() {
-  const all = await listArticles({ limit: 40 });
-  const orgArticles = all.filter((a) => a.category === 'Home Organization');
+  const orgArticles = await listArticles({
+    collection: 'home-organization',
+    limit: 500,
+  });
   const featured = orgArticles.find(
     (a) => a.slug === '15-small-bedroom-storage-ideas',
   );

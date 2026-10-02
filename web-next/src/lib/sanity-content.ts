@@ -178,6 +178,7 @@ export async function loadSanityContent(): Promise<{
       title: a.title,
       subtitle: a.excerpt ?? null,
       category: a.category ?? a.roomName ?? 'Interior Design',
+      collections: a.collections ?? [],
       room: (a.roomSlug ?? 'whole-home') as Room,
       keywords: a.keywords ?? null,
       imageUrl: image(a.hero),

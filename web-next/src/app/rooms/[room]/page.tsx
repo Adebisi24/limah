@@ -91,7 +91,9 @@ export default async function RoomHubPage({
   if (!cfg) notFound();
 
   const all = await getAllArticlesLite();
-  const inRoom = all.filter((a) => a.room === room);
+  const inRoom = all.filter(
+    (article) => article.room === room || article.collections.includes(room),
+  );
 
   const featured = inRoom.find((a) => a.slug === cfg.featuredSlug) ?? inRoom[0];
   const ideas = inRoom
@@ -100,8 +102,8 @@ export default async function RoomHubPage({
   const organization = all
     .filter(
       (a) =>
-        a.category === 'Home Organization' &&
-        (a.room === room || (room === 'bedroom' && a.room === 'whole-home')),
+        a.collections.includes('home-organization') &&
+        (a.room === room || a.collections.includes(room)),
     )
     .slice(0, 3);
   const advice = inRoom

@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { getCliClient } from 'sanity/cli';
 import { SITE_AUTHOR_ID } from '../studio/siteAuthor';
+import { classifyArticle } from './classify-article-collections';
 
 const client = getCliClient({ apiVersion: '2026-09-24' }).withConfig({
   useCdn: false,
@@ -165,6 +166,12 @@ for (const a of articles) {
     continue;
   }
   try {
+    const kind = formats[a.format] || a.format;
+    const taxonomy = classifyArticle({
+      ...a,
+      kind,
+      room: a.room,
+    });
     const designBlocks = a.body.map((b: any, i: number) => {
       const { type, src, alt, productId, ...fields } = b;
       const block: any = {
@@ -199,10 +206,11 @@ for (const a of articles) {
       _type: 'article',
       title: a.title,
       slug: { _type: 'slug', current: a.slug },
-      kind: formats[a.format] || a.format,
+      kind,
       excerpt: a.subtitle || a.description || '',
       seoDescription: a.description,
-      category: a.category,
+      category: taxonomy.category,
+      collections: taxonomy.collections,
       keywords: a.keywords,
       tags: a.tags,
       popular: a.popular,

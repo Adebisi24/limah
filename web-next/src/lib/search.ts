@@ -13,6 +13,7 @@ export function filterArticles(
         a.subtitle,
         a.keywords,
         a.category,
+        ...a.collections,
         a.room.replaceAll('-', ' '),
         FORMAT_LABELS[a.format],
         ...a.tags,

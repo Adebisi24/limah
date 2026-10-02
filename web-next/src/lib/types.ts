@@ -108,6 +108,7 @@ export interface Article {
   title: string;
   subtitle: string | null;
   category: string;
+  collections: string[];
   room: Room;
   keywords: string | null;
   imageUrl: string;

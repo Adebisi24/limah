@@ -19,6 +19,7 @@ export function legacyArticles(): Article[] {
       title: a.title,
       subtitle: a.excerpt,
       category: a.category,
+      collections: [],
       room: (a.room.replaceAll(' ', '-') === 'interior-design'
         ? 'whole-home'
         : a.room.replaceAll(' ', '-')) as Room,

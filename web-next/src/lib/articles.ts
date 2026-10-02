@@ -36,6 +36,7 @@ export interface ArticleFilter {
   formats?: ArticleFormat[];
   room?: string;
   tag?: string;
+  collection?: string;
   excludeSlug?: string;
   limit?: number;
 }
@@ -47,6 +48,7 @@ export async function listArticles(f: ArticleFilter = {}) {
         (!f.formats || f.formats.includes(a.format)) &&
         (!f.room || a.room === f.room) &&
         (!f.tag || a.tags.includes(f.tag)) &&
+        (!f.collection || a.collections.includes(f.collection)) &&
         a.slug !== f.excludeSlug,
     )
     .slice(0, f.limit ?? 30);

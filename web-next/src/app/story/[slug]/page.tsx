@@ -30,6 +30,8 @@ const ROOM_NAMES: Record<string, string> = {
 
 function categoryHref(category: string): string {
   switch (category) {
+    case 'Home':
+      return '/collection/home';
     case 'Bedroom':
       return '/rooms/bedroom';
     case 'Living Room':

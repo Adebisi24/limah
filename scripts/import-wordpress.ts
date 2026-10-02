@@ -16,6 +16,7 @@ import {
   wordpressIdentities,
 } from './wordpress-content';
 import { SITE_AUTHOR_ID } from '../studio/siteAuthor';
+import { classifyArticle } from './classify-article-collections';
 
 const source = process.argv.find((arg) => arg.endsWith('.xml'));
 if (!source) throw new Error('Pass a WordPress XML export path.');
@@ -341,6 +342,15 @@ for (const post of posts) {
         categoryText.includes(r.replaceAll('-', ' ')),
       ) || 'whole-home';
     const room = rooms.find((r) => r.slug?.current === roomSlug);
+    const taxonomy = classifyArticle({
+      title,
+      slug,
+      kind: 'inspiration',
+      category: categories[0] || 'Home',
+      tags,
+      excerpt,
+      room: roomSlug,
+    });
     const article: any = {
       _type: 'article',
       legacyId,
@@ -354,7 +364,8 @@ for (const post of posts) {
         ? { seoDescription: prepared.seoDescription }
         : {}),
       body,
-      category: categories[0] || 'Interior Design',
+      category: taxonomy.category,
+      collections: taxonomy.collections,
       tags,
       publishedAt,
       updatedAt: iso(get(post, 'wp:post_modified_gmt')),

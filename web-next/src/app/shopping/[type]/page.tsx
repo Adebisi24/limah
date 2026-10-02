@@ -7,35 +7,35 @@ import { NewsletterBand, Breadcrumbs } from '@/components/chrome';
 const TYPES: Record<
   string,
   {
-    format: 'finds' | 'best-products' | 'buying-guide' | 'shop-the-look';
+    collection: string;
     title: string;
     intro: string;
     eyebrow: string;
   }
 > = {
   finds: {
-    format: 'finds',
+    collection: 'shopping-finds',
     title: 'Shopping Finds',
     eyebrow: 'Fast Discovery',
     intro:
       'The fast lane: short editorial notes, current prices at real retailers, and no 2,000-word comparison in sight. If a find earns a spot, it earns it by living in a real room.',
   },
   'best-products': {
-    format: 'best-products',
+    collection: 'best-products',
     title: 'Best Products',
     eyebrow: 'Comparison & Decision Support',
     intro:
       'The short answer to long search histories. Each guide compares a small list of the best options in a category — with trade-offs named, specs verified, and prices at every retailer we could find.',
   },
   'buying-guides': {
-    format: 'buying-guide',
+    collection: 'buying-guides',
     title: 'Buying Guides',
     eyebrow: 'The Framework First',
     intro:
       'The least sales-heavy corner of the site. Guides explain the measurements, categories, and mistakes before they mention a single product — so you buy deliberately, not impulsively.',
   },
   'shop-the-look': {
-    format: 'shop-the-look',
+    collection: 'shop-the-look',
     title: 'Shop the Look',
     eyebrow: 'Rooms, Piece by Piece',
     intro:
@@ -69,7 +69,10 @@ export default async function ShoppingTypePage({
   const cfg = TYPES[type];
   if (!cfg) notFound();
 
-  const articles = await listArticles({ format: cfg.format, limit: 12 });
+  const articles = await listArticles({
+    collection: cfg.collection,
+    limit: 500,
+  });
 
   return (
     <>

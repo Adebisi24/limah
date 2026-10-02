@@ -58,7 +58,7 @@ export default async function HomePage() {
     bySlug('living-room-layout-ideas-that-feel-effortless'),
   ].filter(Boolean);
   const organization = all
-    .filter((a) => a.category === 'Home Organization')
+    .filter((a) => a.collections.includes('home-organization'))
     .slice(0, 3);
   const finds = all.filter((a) => a.format === 'finds').slice(0, 4);
   const stl = bySlug('shop-this-modern-luxury-bedroom');

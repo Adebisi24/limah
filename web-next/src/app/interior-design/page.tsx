@@ -29,7 +29,7 @@ const STYLES = [
 
 export default async function InteriorDesignPage() {
   const all = await listArticles({
-    formats: ['inspiration', 'howto'],
+    collection: 'interior-design',
     limit: 20,
   });
   const featured = all.find(

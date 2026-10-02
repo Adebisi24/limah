@@ -1,5 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { getAllArticlesLite } from '@/lib/articles';
+import {
+  ARTICLE_COLLECTIONS,
+  ARTICLE_COLLECTION_GROUPS,
+} from '../../../article-collections';
 export const dynamic = 'force-static';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (process.env.CONTENT_MODE !== 'sanity' || !process.env.SITE_URL) return [];
@@ -13,7 +17,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/rooms/living-room/',
     '/rooms/kitchen/',
     '/rooms/bathroom/',
+    '/shopping/finds/',
+    '/shopping/best-products/',
+    '/shopping/buying-guides/',
+    '/shopping/shop-the-look/',
   ];
+  const sectionSlugs = new Set(
+    ARTICLE_COLLECTION_GROUPS.map((group) => group.slug).filter(
+      (slug) => slug !== 'home',
+    ),
+  );
+  pages.push(
+    ...ARTICLE_COLLECTIONS.filter(
+      (collection) => !sectionSlugs.has(collection.slug),
+    ).map((collection) => `/collection/${collection.slug}/`),
+  );
   return [
     ...pages.map((p) => ({ url: new URL(p, process.env.SITE_URL).href })),
     ...(await getAllArticlesLite()).map((a) => ({

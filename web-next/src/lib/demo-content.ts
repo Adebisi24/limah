@@ -62,6 +62,7 @@ export const demoArticles: Article[] = [
   title: a.title,
   subtitle: a.subtitle,
   category: a.category,
+  collections: a.tags,
   room: a.room,
   keywords: a.keywords,
   imageUrl: a.image,
