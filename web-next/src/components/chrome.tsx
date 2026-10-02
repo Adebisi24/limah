@@ -173,15 +173,7 @@ export function ContextLinks({
 
 /* ---------------- Author bio ---------------- */
 export function AuthorBio({ article }: { article: Article }) {
-  const bio =
-    article.authorBio ||
-    (process.env.CONTENT_MODE === 'sanity'
-      ? `Articles by ${article.author}.`
-      : article.author === 'Maya Ellison'
-        ? 'Maya Ellison is the design editor at Nest Nabber, where she writes about rooms, palettes, and the details that make a house feel finished.'
-        : article.author === 'Jonah Reyes'
-          ? 'Jonah Reyes is the shopping editor at Nest Nabber. He writes the product roundups, comparisons, and shop-the-look guides — and keeps the retailer prices honest.'
-          : 'Priya Shah writes the organization and advice sections at Nest Nabber, turning storage problems into systems that actually hold.');
+  const bio = article.authorBio || `Articles by ${article.author}.`;
   const initials = article.author
     .split(' ')
     .map((n) => n[0])

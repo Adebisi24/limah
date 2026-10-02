@@ -15,6 +15,7 @@ import {
   prepareWordPressContent,
   wordpressIdentities,
 } from './wordpress-content';
+import { SITE_AUTHOR_ID } from '../studio/siteAuthor';
 
 const source = process.argv.find((arg) => arg.endsWith('.xml'));
 if (!source) throw new Error('Pass a WordPress XML export path.');
@@ -211,7 +212,11 @@ if (!articlesOnly)
     saveReport();
   });
 
-const authors: any[] = await client.fetch('*[_type=="author"]{_id,name}');
+const siteAuthor = await client.fetch(
+  '*[_type=="author" && _id==$id][0]{_id,name}',
+  { id: SITE_AUTHOR_ID },
+);
+if (!siteAuthor) throw new Error('The site author profile is missing.');
 const rooms: any[] = await client.fetch('*[_type=="room"]{_id,slug}');
 const identities = wordpressIdentities(posts, get);
 const importedSlugs = new Set([...identities.values()].map((p) => p.slug));
@@ -311,12 +316,6 @@ for (const post of posts) {
           metadata(thumbnail, '_wp_attachment_image_alt') || title,
         )
       : imageValues[0];
-    const authorName = get(post, 'dc:creator') || 'Nest Nabber';
-    let author = authors.find((a) => a.name === authorName);
-    if (!author && write) {
-      author = await client.create({ _type: 'author', name: authorName });
-      authors.push(author);
-    }
     const categories = [
       ...post.querySelectorAll('category[domain="category"]'),
     ].map((c) => c.textContent || '');
@@ -360,7 +359,7 @@ for (const post of posts) {
       publishedAt,
       updatedAt: iso(get(post, 'wp:post_modified_gmt')),
       ...(hero ? { hero } : {}),
-      ...(author ? { author: { _type: 'reference', _ref: author._id } } : {}),
+      author: { _type: 'reference', _ref: siteAuthor._id },
       ...(room ? { room: { _type: 'reference', _ref: room._id } } : {}),
     };
     if (!publish) article._id = 'drafts.' + randomUUID();

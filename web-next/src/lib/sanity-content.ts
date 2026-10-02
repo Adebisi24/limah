@@ -183,7 +183,7 @@ export async function loadSanityContent(): Promise<{
       imageUrl: image(a.hero),
       imageAlt: a.hero?.alt ?? a.title,
       description: a.seoDescription ?? a.excerpt ?? null,
-      author: a.authorName ?? 'Nest Nabber Editors',
+      author: a.authorName ?? 'Nest Nabber',
       authorBio: a.authorBio,
       publishedAt: new Date(a.publishedAt),
       updatedAt: a.updatedAt ? new Date(a.updatedAt) : null,

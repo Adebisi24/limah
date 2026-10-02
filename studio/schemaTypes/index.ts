@@ -5,6 +5,7 @@ import { UserIcon } from '@sanity/icons/User';
 import { TagIcon } from '@sanity/icons/Tag';
 import { CogIcon } from '@sanity/icons/Cog';
 import { ImageIcon } from '@sanity/icons/Image';
+import { SITE_AUTHOR_ID } from '../siteAuthor';
 const text = (name: string, title?: string) =>
   defineField({ name, title, type: 'string' });
 const paragraph = (name: string, title?: string) =>
@@ -116,7 +117,7 @@ const body = defineField({
 });
 const author = defineType({
   name: 'author',
-  title: 'Authors',
+  title: 'My author profile',
   type: 'document',
   icon: UserIcon,
   fields: [
@@ -284,7 +285,15 @@ const article = defineType({
       description:
         'Optional for text-only articles. Add a cover image when one is available.',
     },
-    { ...ref('author', 'author'), group: 'story' },
+    defineField({
+      name: 'author',
+      type: 'reference',
+      to: [{ type: 'author' }],
+      group: 'story',
+      hidden: true,
+      initialValue: { _type: 'reference', _ref: SITE_AUTHOR_ID },
+      validation: (rule) => rule.required(),
+    }),
     { ...ref('room', 'room'), group: 'story' },
     { ...refs('styles', 'style'), group: 'story' },
     defineField({

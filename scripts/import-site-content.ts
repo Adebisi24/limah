@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { getCliClient } from 'sanity/cli';
+import { SITE_AUTHOR_ID } from '../studio/siteAuthor';
 
 const client = getCliClient({ apiVersion: '2026-09-24' }).withConfig({
   useCdn: false,
@@ -128,6 +129,7 @@ function product(id: number) {
   return ref(target);
 }
 async function named(type: string, name: string, slug?: string) {
+  if (type === 'author') return ref(SITE_AUTHOR_ID);
   let doc = existing.find(
     (d) =>
       d._type === type &&

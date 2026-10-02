@@ -1,9 +1,9 @@
 # Adding content to Nest Nabber
 
 1. Open https://nest-nabber-limah.sanity.studio/ and sign in to Sanity. The local editor is also available at http://localhost:3333 while `npm run studio` is running.
-2. Create your author and room documents first. Use Bedroom, Living Room, Kitchen, and Bathroom for the current hubs. Styles are reusable tags; style SEO landing pages are not automatically published.
+2. Edit **My author profile** once with your public name, bio, and portrait. Every article uses this single profile automatically. Create room documents as needed; use Bedroom, Living Room, Kitchen, and Bathroom for the current hubs. Styles are reusable tags; style SEO landing pages are not automatically published.
 3. Add reusable products with an image, exact/similar relationship, and up to three retailer links. Enter a price only after checking it; otherwise the site uses “Check price at [retailer]”. Product links must use HTTP or HTTPS.
-4. Create an Article and select one of the six article formats. Set its title, slug, excerpt, author, room, and publication date. A cover image is optional for text-only posts. Add article text in the rich-text field.
+4. Create an Article and select one of the six article formats. Set its title, slug, excerpt, room, and publication date. Your author profile is attached automatically. A cover image is optional for text-only posts. Add article text in the rich-text field.
 5. Inspiration articles use the Ideas array for each image, heading, and paragraph. Buying Guides use Guide Sections for advice, checklists, and diagrams/images. Shopping formats use product references plus article-specific editorial notes. Best Products includes methodology and pros/cons; Shopping Finds hides those extra details on the website.
 6. Select preferred related articles if needed. Otherwise the site chooses other articles of the relevant format, prioritizing the same room. It shows only available content and never duplicates a card just to fill a count. Maximums follow the approved layouts: 12/8 or 8 looks. Plan Your Room accepts up to eight article references and always renders text-only links.
 7. Open Site Settings to select the homepage feature and latest stories, brand text, description, and contact address.
